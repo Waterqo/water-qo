@@ -1,0 +1,31 @@
+{
+  "name": "waterpump",
+  "version": "1.0.0",
+  "description": "water complain system",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/109taha/WaterComplaining.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/109taha/WaterComplaining/issues"
+  },
+  "homepage": "https://github.com/109taha/WaterComplaining#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cloudinary": "^1.40.0",
+    "cors": "^2.8.5",
+    "dcrypt": "^0.0.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.1",
+    "mongoose": "^7.4.5",
+    "multer": "^1.4.5-lts.1"
+  }
+}
