@@ -4,8 +4,9 @@ const Admin = require("../models/adminOrStaff");
 const Client = require("../models/clientSchema");
 const JWT = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const { AdminJoiSchema, ClientJoiSchme } = require("../helper/joi/joiSchema");
 
-router.post("/register/client", async (req, res) => {
+router.post("/register/client", ClientJoiSchme, async (req, res) => {
   try {
     const { name, contact_number, email, password, address, city } = req.body;
     if (!name || !contact_number || !email || !password || !address || !city) {
@@ -41,7 +42,7 @@ router.post("/register/client", async (req, res) => {
   }
 });
 
-router.post("/register/admin", async (req, res) => {
+router.post("/register/admin", AdminJoiSchema, async (req, res) => {
   try {
     const { name, contact_number, email, password } = req.body;
     if (!name || !contact_number || !email || !password) {
@@ -76,7 +77,7 @@ router.post("/register/admin", async (req, res) => {
   }
 });
 
-router.post("/register/Staff", async (req, res) => {
+router.post("/register/Staff", AdminJoiSchema, async (req, res) => {
   try {
     const { name, contact_number, email, password } = req.body;
     if (!name || !contact_number || !email || !password) {

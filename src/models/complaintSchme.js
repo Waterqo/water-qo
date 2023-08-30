@@ -42,10 +42,6 @@ const ComplaintSchme = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
     },
-    resolved: {
-      type: Boolean,
-      default: false,
-    },
   },
   { timestamps: true }
 );

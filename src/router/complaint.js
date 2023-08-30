@@ -4,10 +4,12 @@ const fs = require("fs");
 const upload = require("../helper/multer");
 const Complaint = require("../models/complaintSchme");
 const ComplaintResolved = require("../models/complaintResolvedSchme");
+const { ComplaintJoiSchema } = require("../helper/joi/joiSchema");
 
 router.post(
   "/create/complaint",
   upload.array("attachArtwork", 5),
+  ComplaintJoiSchema,
   async (req, res) => {
     const files = req.files;
     const attachArtwork = [];
