@@ -35,6 +35,21 @@ const ClientJoiSchme = (req, res, next) => {
 const ComplaintSchme = Joi.object({
   nameOfComplainter: Joi.string().required(),
   water_Station: Joi.string().required(),
+  complaintCategory: Joi.string()
+    .required()
+    .valid(
+      "Water Quality and Taste",
+      "Service and Billing",
+      "Safety Concerns",
+      "Customer Service",
+      "Availability and Stock",
+      "Delivery Issues",
+      "Communication and Transparency",
+      "Environmental Concerns",
+      "Technical Problems",
+      "General Hygiene and Cleanliness",
+      "Accessibility Issues"
+    ),
   city: Joi.string().required(),
   complaint: Joi.string().required(),
 });

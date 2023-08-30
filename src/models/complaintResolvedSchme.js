@@ -11,7 +11,7 @@ const ComplaintResolvedSchme = new mongoose.Schema(
       default: false,
     },
     pics: {
-      type: String,
+      type: Array,
       require: true,
     },
   },

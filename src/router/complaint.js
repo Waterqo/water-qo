@@ -41,7 +41,6 @@ router.post(
         complaintCategory,
         city,
         complaint,
-        pics,
       } = req.body;
       if (
         !nameOfComplainter ||
@@ -54,16 +53,16 @@ router.post(
           .status(400)
           .send({ success: false, message: "kindle provide all the details" });
       }
-
+      console.log(attachArtwork.map((x) => x.url));
       const newComplaint = new Complaint({
         nameOfComplainter,
         water_Station,
         complaintCategory,
         city,
         complaint,
-        pics: attachArtwork[0].url,
+        pics: attachArtwork.map((x) => x.url),
       });
-
+      console.log(newComplaint);
       await newComplaint.save();
       return res.status(200).send({
         success: true,
@@ -142,7 +141,7 @@ router.post(
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
         resolved: true,
-        pics: attachArtwork[0].url,
+        pics: attachArtwork.map((x) => x.url),
       });
       await complaintReply.save();
       res.status(200).send({

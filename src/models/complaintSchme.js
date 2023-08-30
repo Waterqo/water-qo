@@ -36,7 +36,7 @@ const ComplaintSchme = new mongoose.Schema(
       required: true,
     },
     pics: {
-      type: String,
+      type: Array,
     },
     staffId: {
       type: mongoose.Schema.Types.ObjectId,
