@@ -2,18 +2,13 @@ const mongoose = require("mongoose");
 
 const ComplaintSchme = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: "User",
-    },
     nameOfComplainter: {
       type: String,
       required: true,
     },
     water_Station: {
       type: String,
-      require: true,
+      required: true,
     },
     complaintCategory: {
       type: String,
@@ -38,11 +33,18 @@ const ComplaintSchme = new mongoose.Schema(
     },
     complaint: {
       type: String,
-      require: true,
+      required: true,
     },
     pics: {
       type: String,
-      require: true,
+    },
+    staffId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+    resolved: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
