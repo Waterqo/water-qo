@@ -127,9 +127,30 @@ router.post("/login", async (req, res) => {
 
     const user = await Admin.findOne({ email: req.body.email });
     if (!user) {
-      return res.status(400).send({
-        success: false,
-        message: "You are not registered, Go to register form",
+      const anotherUser = await Client.findOne({ email: req.body.email });
+      if (!anotherUser) {
+        return res
+          .status(400)
+          .send({ success: false, message: "You Are Not Registered !" });
+      }
+      const validPassword = await bcrypt.compare(
+        req.body.password,
+        anotherUser.password
+      );
+      if (!validPassword) {
+        return res.status(400).send({
+          success: false,
+          message: "Maybe your Email or Password is not correct!",
+        });
+      }
+
+      const token = JWT.sign({ userId: anotherUser._id }, process.env.JWT_SEC);
+
+      return res.status(200).send({
+        success: true,
+        message: "Client login successfully",
+        token,
+        anotherUser,
       });
     }
 
@@ -148,7 +169,7 @@ router.post("/login", async (req, res) => {
 
     res.status(200).send({
       success: true,
-      message: "Admin login successfully",
+      message: "User login successfully",
       token,
       user,
     });
