@@ -27,10 +27,6 @@ const ComplaintSchme = new mongoose.Schema(
         "Accessibility Issues",
       ],
     },
-    city: {
-      type: String,
-      required: true,
-    },
     complaint: {
       type: String,
       required: true,

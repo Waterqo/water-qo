@@ -24,7 +24,9 @@ app.listen(PORT, () => {
 
 const UserRouter = require("./router/user");
 const ComplaintRouter = require("./router/complaint");
+const VisitsDaily = require("./router/Visits");
 
 //router
 app.use("/auth", UserRouter);
 app.use("/v1", ComplaintRouter);
+app.use("/visit", VisitsDaily);

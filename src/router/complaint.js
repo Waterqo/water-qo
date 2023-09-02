@@ -35,18 +35,12 @@ router.post(
           console.log(err);
         }
       }
-      const {
-        nameOfComplainter,
-        water_Station,
-        complaintCategory,
-        city,
-        complaint,
-      } = req.body;
+      const { nameOfComplainter, water_Station, complaintCategory, complaint } =
+        req.body;
       if (
         !nameOfComplainter ||
         !water_Station ||
         !complaintCategory ||
-        !city ||
         !complaint
       ) {
         return res
@@ -58,7 +52,6 @@ router.post(
         nameOfComplainter,
         water_Station,
         complaintCategory,
-        city,
         complaint,
         pics: attachArtwork.map((x) => x.url),
       });
