@@ -22,6 +22,10 @@ app.listen(PORT, () => {
   console.log(`server is running on port: ${PORT}`);
 });
 
+app.get("/", (req, res) => {
+  res.status(200).send("Server Is Running");
+});
+
 const UserRouter = require("./router/user");
 const ComplaintRouter = require("./router/complaint");
 const VisitsDaily = require("./router/Visits");
