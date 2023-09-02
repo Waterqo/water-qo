@@ -5,7 +5,7 @@ const AdminSchema = Joi.object({
   contact_number: Joi.number().required(),
   email: Joi.string().required(),
   password: Joi.string().required(),
-});
+}).unknown();
 const AdminJoiSchema = (req, res, next) => {
   const { error } = AdminSchema.validate(req.body, { abortEarly: false });
   if (error) {
@@ -22,7 +22,7 @@ const ClientSchme = Joi.object({
   password: Joi.string().required(),
   address: Joi.string().required(),
   city: Joi.string().required(),
-});
+}).unknown();
 const ClientJoiSchme = (req, res, next) => {
   const { error } = ClientSchme.validate(req.body, { abortEarly: false });
   if (error) {
@@ -52,7 +52,7 @@ const ComplaintSchme = Joi.object({
     ),
   city: Joi.string().required(),
   complaint: Joi.string().required(),
-});
+}).unknown();
 const ComplaintJoiSchema = (req, res, next) => {
   const { error } = ComplaintSchme.validate(req.body, { abortEarly: false });
   if (error) {
