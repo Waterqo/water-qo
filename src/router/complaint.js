@@ -78,7 +78,7 @@ router.post(
 router.get("/complaints", async (req, res) => {
   try {
     const allComplain = await Complaint.find();
-    if (allComplain.length > 0) {
+    if (!allComplain.length > 0) {
       return res
         .status(400)
         .send({ success: false, message: "No Complaint found! mubarak ho" });
