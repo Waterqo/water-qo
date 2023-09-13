@@ -40,7 +40,7 @@ const ComplaintSchme = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Solved", "Pending", "Assign to Staff"],
+      enum: ["Solved", "Pending", "AssignToStaff"],
       default: ["Pending"],
     },
   },

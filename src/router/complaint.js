@@ -94,7 +94,7 @@ router.put("/assignstaff/:Id", async (req, res) => {
   try {
     const complaintId = req.params.Id;
     const { staffId } = req.body;
-    const status = "Assign to Staff";
+    const status = "AssignToStaff";
     const updatedComplaint = await Complaint.findByIdAndUpdate(
       complaintId,
       { $set: { staffId, status } },
@@ -144,11 +144,16 @@ router.post(
         }
       }
       const complaintId = req.params.Id;
+      const complaint = await Complaint.findById(complaintId);
+      const status = "Solved";
+      complaint.status = status;
+
+      console.log(complaint);
+      complaint.save();
       const text = req.body.text;
 
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
-        resolved: true,
         text,
         pics: attachArtwork.map((x) => x.url),
       });

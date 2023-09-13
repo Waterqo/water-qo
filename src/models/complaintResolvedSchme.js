@@ -6,10 +6,6 @@ const ComplaintResolvedSchme = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       require: true,
     },
-    resolved: {
-      type: Boolean,
-      default: false,
-    },
     text: {
       type: String,
     },
