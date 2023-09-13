@@ -9,5 +9,16 @@ async function connectToMongoDB() {
     console.error(error);
   }
 }
+// const complaint = await Complaint.findById(complaintId);
+
+// if (!complaint) {
+//   return res
+//     .status(404)
+//     .json({ success: false, message: "Complaint not found" });
+// }
+
+// console.log(complaint.status);
+// const status = "Solved";
+// complaint.status = status;
 
 module.exports = connectToMongoDB;

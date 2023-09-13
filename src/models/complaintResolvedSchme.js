@@ -10,6 +10,9 @@ const ComplaintResolvedSchme = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    text: {
+      type: String,
+    },
     pics: {
       type: Array,
       require: true,
