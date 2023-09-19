@@ -35,13 +35,8 @@ router.post(
           console.log(err);
         }
       }
-      const {
-        nameOfComplainter,
-        water_Station,
-        complaintCategory,
-        complaint,
-        status,
-      } = req.body;
+      const { nameOfComplainter, water_Station, complaintCategory, complaint } =
+        req.body;
       if (
         !nameOfComplainter ||
         !water_Station ||
@@ -58,7 +53,6 @@ router.post(
         water_Station,
         complaintCategory,
         complaint,
-        status: "Pending",
         pics: attachArtwork.map((x) => x.url),
       });
       console.log(newComplaint);
@@ -78,7 +72,7 @@ router.post(
 router.get("/complaints", async (req, res) => {
   try {
     const allComplain = await Complaint.find();
-    if (!allComplain.length > 0) {
+    if (!allComplain) {
       return res
         .status(400)
         .send({ success: false, message: "No Complaint found! mubarak ho" });
@@ -93,22 +87,14 @@ router.get("/complaints", async (req, res) => {
 router.put("/assignstaff/:Id", async (req, res) => {
   try {
     const complaintId = req.params.Id;
-    const { staffId } = req.body;
-    const status = "AssignToStaff";
-    const updatedComplaint = await Complaint.findByIdAndUpdate(
+    const staffId = req.body;
+    const assignStaff = await Complaint.findByIdAndUpdate(
       complaintId,
-      { $set: { staffId, status } },
+      staffId,
       { new: true }
     );
-
-    if (!updatedComplaint) {
-      return res.status(404).send({ message: "Complaint not found" });
-    }
-
-    res.status(200).send({
-      message: "Staff and status updated successfully!",
-      updatedComplaint,
-    });
+    await assignStaff.save();
+    res.status(200).send({ message: "Staff added successfully!", assignStaff });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
@@ -131,7 +117,7 @@ router.post(
         const { path } = file;
         try {
           const uploader = await cloudinary.uploader.upload(path, {
-            folder: "water_complaint",
+            folder: "24-Karat",
           });
           attachArtwork.push({ url: uploader.url });
           fs.unlinkSync(path);
@@ -144,23 +130,16 @@ router.post(
         }
       }
       const complaintId = req.params.Id;
-      const complaint = await Complaint.findById(complaintId);
-      const status = "Solved";
-      complaint.status = status;
-
-      console.log(complaint);
-      complaint.save();
-      const text = req.body.text;
 
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
-        text,
+        resolved: true,
         pics: attachArtwork.map((x) => x.url),
       });
       await complaintReply.save();
       res.status(200).send({
-        message: "Complaint is successfully resolved",
-        data: complaintReply,
+        message: "complaint is successsfully resolved",
+        complaintReply,
       });
     } catch (error) {
       console.error(error);

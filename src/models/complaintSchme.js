@@ -38,11 +38,6 @@ const ComplaintSchme = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
     },
-    status: {
-      type: String,
-      enum: ["Solved", "Pending", "AssignToStaff"],
-      default: ["Pending"],
-    },
   },
   { timestamps: true }
 );
