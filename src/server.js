@@ -29,8 +29,10 @@ app.get("/", (req, res) => {
 const UserRouter = require("./router/user");
 const ComplaintRouter = require("./router/complaint");
 const VisitsDaily = require("./router/Visits");
+const Plant = require("./router/plant")
 
 //router
 app.use("/auth", UserRouter);
 app.use("/v1", ComplaintRouter);
 app.use("/visit", VisitsDaily);
+app.use("/plants", Plant)
