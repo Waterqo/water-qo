@@ -25,7 +25,7 @@ router.post(
           const uploader = await cloudinary.uploader.upload(path, {
             folder: "24-Karat",
           });
-          attachArtwork.push({ url: uploader.url });
+          attachArtwork.push({ url: uploader.secure_url});
           fs.unlinkSync(path);
         } catch (err) {
           if (attachArtwork?.length) {
@@ -119,7 +119,7 @@ router.post(
           const uploader = await cloudinary.uploader.upload(path, {
             folder: "24-Karat",
           });
-          attachArtwork.push({ url: uploader.url });
+          attachArtwork.push({ url: uploader.secure_url});
           fs.unlinkSync(path);
         } catch (err) {
           if (attachArtwork?.length) {
