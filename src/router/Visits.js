@@ -60,4 +60,20 @@ router.get("/all/visits", async (req, res) => {
   }
 });
 
+router.get("/one/visits/:visitId", async (req, res) => {
+  try {
+    const visitId = req.params.visitId
+
+    const allVisits = await DailyVisit.findById(visitId);
+
+    if (!allVisits) {
+      return res.status(400).send({ message: "no Visits found" });
+    }
+    res.status(200).send({ success: true, allVisits });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
 module.exports = router;

@@ -101,8 +101,7 @@ router.put("/assignstaff/:Id", async (req, res) => {
   }
 });
 
-router.post(
-  "/complaint/resolved/:Id",
+router.post("/complaint/resolved/:Id",
   upload.array("attachArtwork", 5),
   async (req, res) => {
     const files = req.files;
