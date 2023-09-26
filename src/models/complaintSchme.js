@@ -25,6 +25,7 @@ const ComplaintSchme = new mongoose.Schema(
         "Technical Problems",
         "General Hygiene and Cleanliness",
         "Accessibility Issues",
+        "Other"
       ],
     },
     complaint: {

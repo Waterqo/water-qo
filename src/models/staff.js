@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ClientSchema = new mongoose.Schema(
+const StaffSchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -27,19 +27,14 @@ const ClientSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    address: {
-      type: String,
-      require: true,
-      trim: true,
-    },
-    city: {
-      type: String,
-      require: true,
+    complaintAssign:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Complaint"
     },
     role: String,
   },
   { timestamps: true }
 );
 
-const Client = mongoose.model("Client", ClientSchema);
-module.exports = Client;
+const Staff = mongoose.model("Staff", StaffSchema);
+module.exports = Staff;
