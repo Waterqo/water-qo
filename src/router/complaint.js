@@ -47,7 +47,7 @@ router.post(
           .status(400)
           .send({ success: false, message: "kindle provide all the details" });
       }
-      console.log(attachArtwork.map((x) => x.url));
+
       const newComplaint = new Complaint({
         nameOfComplainter,
         waterPlant,
@@ -60,7 +60,7 @@ router.post(
       return res.status(200).send({
         success: true,
         message: "your complaint is send successfully",
-        newComplaint,
+        data: newComplaint,
       });
     } catch (error) {
       console.error(error);
