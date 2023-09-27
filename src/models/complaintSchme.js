@@ -6,9 +6,9 @@ const ComplaintSchme = new mongoose.Schema(
       type: String,
       required: true,
     },
-    water_Station: {
-      type: String,
-      required: true,
+    waterPlant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plant",
     },
     complaintCategory: {
       type: String,
@@ -25,7 +25,7 @@ const ComplaintSchme = new mongoose.Schema(
         "Technical Problems",
         "General Hygiene and Cleanliness",
         "Accessibility Issues",
-        "Other"
+        "Other",
       ],
     },
     complaint: {

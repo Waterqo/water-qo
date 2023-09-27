@@ -35,11 +35,11 @@ router.post(
           console.log(err);
         }
       }
-      const { nameOfComplainter, water_Station, complaintCategory, complaint } =
+      const { nameOfComplainter, waterPlant, complaintCategory, complaint } =
         req.body;
       if (
         !nameOfComplainter ||
-        !water_Station ||
+        !waterPlant ||
         !complaintCategory ||
         !complaint
       ) {
@@ -50,7 +50,7 @@ router.post(
       console.log(attachArtwork.map((x) => x.url));
       const newComplaint = new Complaint({
         nameOfComplainter,
-        water_Station,
+        waterPlant,
         complaintCategory,
         complaint,
         pics: attachArtwork.map((x) => x.url),

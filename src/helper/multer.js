@@ -22,7 +22,7 @@ const imageFilter = (req, file, cb) => {
   ) {
     cb(null, true);
   } else {
-    cb(new Error("Only image or zip files are allowed!"));
+    cb(new Error("Only png, jpg, jpeg, avif, jfif, webp are allowed"));
   }
 };
 
