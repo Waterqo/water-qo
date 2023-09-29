@@ -27,15 +27,12 @@ const ClientSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    address: {
-      type: String,
-      require: true,
-      trim: true,
-    },
-    city: {
-      type: String,
-      require: true,
-    },
+    waterPlant: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Plant",
+      },
+    ],
     role: String,
   },
   { timestamps: true }
