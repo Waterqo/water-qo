@@ -29,9 +29,11 @@ const ClientSchema = new mongoose.Schema(
     },
     waterPlant: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Plant",
-      },
+        id:{
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Plant",
+        },
+      }
     ],
     role: String,
   },

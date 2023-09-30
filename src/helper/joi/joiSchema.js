@@ -21,8 +21,6 @@ const ClientSchme = Joi.object({
   contact_number: Joi.string().required(),
   email: Joi.string().required(),
   password: Joi.string().required(),
-  address: Joi.string().required(),
-  city: Joi.string().required(),
 }).unknown();
 
 const ClientJoiSchme = (req, res, next) => {

@@ -14,8 +14,8 @@ const { AdminJoiSchema, ClientJoiSchme } = require("../helper/joi/joiSchema");
 
 router.post("/register/client", ClientJoiSchme, async (req, res) => {
   try {
-    const { name, contact_number, email, password, address, city } = req.body;
-    if (!name || !contact_number || !email || !password || !address || !city) {
+    const { name, contact_number, email, password, waterPlant } = req.body;
+    if (!name || !contact_number || !email || !password ) {
       return res.status(400).send({
         success: false,
         message: "Kindly provide complete information.",
@@ -39,8 +39,7 @@ router.post("/register/client", ClientJoiSchme, async (req, res) => {
       contact_number,
       email,
       password: hashedPassword,
-      address,
-      city,
+      waterPlant,
       role: "Client",
     });
     await user.save();
