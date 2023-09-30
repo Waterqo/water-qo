@@ -71,7 +71,25 @@ router.post(
 
 router.get("/complaints", async (req, res) => {
   try {
-    const allComplain = await Complaint.find();
+    const allComplain = await Complaint.find().populate("waterPlant")
+    console.log(allComplain)
+    if (!allComplain) {
+      return res
+        .status(400)
+        .send({ success: false, message: "No Complaint found! mubarak ho" });
+    }
+    res.status(200).send({ success: true, allComplain });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
+router.get("/complaints/:Id", async (req, res) => {
+  try {
+    const Id = req.params.Id
+    const allComplain = await Complaint.findById(Id).populate("waterPlant")
+    console.log(allComplain)
     if (!allComplain) {
       return res
         .status(400)
