@@ -28,11 +28,11 @@ router.get("/all", async (req, res)=>{
   
       }
         const allPlant = await Plant.find()
+          .select("short_id address")
           .skip(skip)
           .limit(limit)
           .sort(sortBY)
         
-          console.log(allPlant)
         const totalPages = Math.ceil(total   / limit);
         res.status(200).send({
           success: true, 
@@ -79,8 +79,9 @@ router.get("/search/:address", async (req, res, next) => {
     })
       .sort(sortBY)
       .skip(skip)
-      .limit(limit);
-
+      .limit(limit)
+      .select("short_id address")
+    
     const totalPages = Math.ceil(total / limit);
 
     res
