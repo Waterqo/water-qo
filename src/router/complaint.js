@@ -35,10 +35,11 @@ router.post(
           console.log(err);
         }
       }
-      const { nameOfComplainter, waterPlant, complaintCategory, complaint } =
+      const { nameOfComplainter,complaintBy, waterPlant, complaintCategory, complaint } =
         req.body;
       if (
         !nameOfComplainter ||
+        !complaintBy ||
         !waterPlant ||
         !complaintCategory ||
         !complaint
@@ -50,12 +51,13 @@ router.post(
 
       const newComplaint = new Complaint({
         nameOfComplainter,
+        complaintBy,
         waterPlant,
         complaintCategory,
         complaint,
+        status: "Pending",
         pics: attachArtwork.map((x) => x.url),
       });
-      console.log(newComplaint);
       await newComplaint.save();
       return res.status(200).send({
         success: true,
@@ -72,7 +74,6 @@ router.post(
 router.get("/complaints", async (req, res) => {
   try {
     const allComplain = await Complaint.find().populate("waterPlant")
-    console.log(allComplain)
     if (!allComplain) {
       return res
         .status(400)
@@ -89,7 +90,6 @@ router.get("/complaints/:Id", async (req, res) => {
   try {
     const Id = req.params.Id
     const allComplain = await Complaint.findById(Id).populate("waterPlant")
-    console.log(allComplain)
     if (!allComplain) {
       return res
         .status(400)

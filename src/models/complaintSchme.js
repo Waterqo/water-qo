@@ -1,10 +1,15 @@
-const mongoose = require("mongoose");
+  const mongoose = require("mongoose");
 
 const ComplaintSchme = new mongoose.Schema(
   {
     nameOfComplainter: {
       type: String,
       required: true,
+    },
+    complaintBy: {
+      type: String,
+      require: true,
+      enum: ["Visitor", "Coustomer", "Staff"]
     },
     waterPlant: {
       type: mongoose.Schema.Types.ObjectId,
@@ -16,6 +21,7 @@ const ComplaintSchme = new mongoose.Schema(
       enum: [
         "Water Quality and Taste",
         "Service and Billing",
+        "Water leaking",
         "Safety Concerns",
         "Customer Service",
         "Availability and Stock",
@@ -34,6 +40,11 @@ const ComplaintSchme = new mongoose.Schema(
     },
     pics: {
       type: Array,
+    },
+    status: {
+      type: String,
+      emnum: ["Pending", "Assign To Staff", "Resolved"],
+      default: "Pending"
     },
     staffId: {
       type: mongoose.Schema.Types.ObjectId,
