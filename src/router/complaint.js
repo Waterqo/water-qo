@@ -73,13 +73,40 @@ router.post(
 
 router.get("/complaints", async (req, res) => {
   try {
-    const allComplain = await Complaint.find().populate("waterPlant")
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Complaint.countDocuments()
+
+    let sortBY = { createdAt: -1 };
+    if(req.query.sort){
+      sortBY = JSON.parse(req.query.sort) 
+    }
+
+    const allComplain = await Complaint.find()
+      .populate("waterPlant")
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY)
+
+
     if (!allComplain) {
       return res
         .status(400)
         .send({ success: false, message: "No Complaint found! mubarak ho" });
     }
-    res.status(200).send({ success: true, allComplain });
+
+    const totalPages = Math.ceil(total   / limit);
+
+    res.status(200).send({ 
+      success: true, 
+      data: allComplain,
+      page, 
+      totalPages, 
+      limit, 
+      total
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
@@ -167,13 +194,35 @@ router.post("/complaint/resolved/:Id",
 
 router.get("/complaint/resolve", async (req, res) => {
   try {
-    const allComplain = await ComplaintResolved.find();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await ComplaintResolved.countDocuments();
+
+    let sortBY = { createdAt: -1 };
+    if(req.query.sort){
+      sortBY = JSON.parse(req.query.sort) 
+    }
+
+    const allComplain = await ComplaintResolved.find()
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY)
+
     if (!allComplain) {
       return res
         .status(400)
         .send({ success: false, message: "No Complaint found! mubarak ho" });
     }
-    res.status(200).send({ success: true, allComplain });
+    const totalPages = Math.ceil(total   / limit);
+    res.status(200).send({ 
+      success: true, 
+      allComplain, 
+      page, 
+      totalPages, 
+      limit, 
+      total
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);

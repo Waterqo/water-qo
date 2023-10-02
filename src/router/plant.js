@@ -25,8 +25,8 @@ router.get("/all", async (req, res)=>{
       let sortBY = { createdAt: -1 };
       if(req.query.sort){
         sortBY = JSON.parse(req.query.sort) 
-  
       }
+      
         const allPlant = await Plant.find()
           .select("short_id address")
           .skip(skip)
