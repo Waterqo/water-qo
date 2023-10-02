@@ -17,8 +17,31 @@ router.post("/added", async (req, res)=>{
 
 router.get("/all", async (req, res)=>{
     try {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const skip = (page - 1) * limit;
+      const total = await Plant.countDocuments();
+  
+      let sortBY = { createdAt: -1 };
+      if(req.query.sort){
+        sortBY = JSON.parse(req.query.sort) 
+  
+      }
         const allPlant = await Plant.find()
-        res.status(200).send({success: true, data: allPlant})
+          .skip(skip)
+          .limit(limit)
+          .sort(sortBY)
+        
+          console.log(allPlant)
+        const totalPages = Math.ceil(total   / limit);
+        res.status(200).send({
+          success: true, 
+          data: allPlant,
+          page, 
+          totalPages, 
+          limit, 
+          total
+        })
     } catch (error) {
         console.error(error);
         res.status(500).send("Internal Server Error: " + error.message);
