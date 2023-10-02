@@ -48,10 +48,10 @@ router.get("/all", async (req, res)=>{
     }
 });
 
-router.get("/one/:address", async (req, res)=>{
+router.get("/one/:id", async (req, res)=>{
     try {
-        const address = req.params.address
-        const plant = await Plant.find({address});
+        const address = req.params.id
+        const plant = await Plant.findById(address);
         if(plant.length <= 0){
             return res.status(400).send({success: false, message: "No Plant found on that location"})
         }
