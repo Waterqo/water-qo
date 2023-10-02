@@ -49,11 +49,33 @@ router.post("/visits", upload.array("attachArtwork", 5), async (req, res) => {
 
 router.get("/all/visits", async (req, res) => {
   try {
-    const allVisits = await DailyVisit.find();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await ComplaintResolved.countDocuments();
+
+    let sortBY = { createdAt: -1 };
+    if(req.query.sort){
+      sortBY = JSON.parse(req.query.sort) 
+    }
+
+    const allVisits = await DailyVisit.find()
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY)
+
     if (!allVisits.length > 0) {
       return res.status(400).send({ message: "no Visits found" });
     }
-    res.status(200).send({ success: true, allVisits });
+    const totalPages = Math.ceil(total   / limit);
+    res.status(200).send({ 
+      success: true, 
+      data: allVisits,
+      page, 
+      totalPages, 
+      limit, 
+      total
+    });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);

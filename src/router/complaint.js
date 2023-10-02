@@ -217,7 +217,7 @@ router.get("/complaint/resolve", async (req, res) => {
     const totalPages = Math.ceil(total   / limit);
     res.status(200).send({ 
       success: true, 
-      allComplain, 
+      data: allComplain, 
       page, 
       totalPages, 
       limit, 
