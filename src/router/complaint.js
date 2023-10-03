@@ -132,13 +132,17 @@ router.get("/complaints/:Id", async (req, res) => {
 router.put("/assignstaff/:Id", async (req, res) => {
   try {
     const complaintId = req.params.Id;
-    const staffId = req.body;
+    const staffId = req.body.staffId;
+    const updated = {
+      staffId,
+      status: "Assigned"
+    }
     const assignStaff = await Complaint.findByIdAndUpdate(
       complaintId,
-      staffId,
+      updated,
       { new: true }
     );
-    await assignStaff.save();
+      console.log(assignStaff)
     res.status(200).send({ message: "Staff added successfully!", assignStaff });
   } catch (error) {
     console.error(error);
@@ -180,6 +184,20 @@ router.post("/complaint/resolved/:Id",
         resolved: true,
         pics: attachArtwork.map((x) => x.url),
       });
+      const resolvedComplaint = complaintReply._id.toString()
+      const updated = {
+        resolvedComplaint,
+        status: "Resolved"
+      }
+      const complaint = await Complaint.findByIdAndUpdate(
+        complaintId,
+        updated,
+        { new: true }
+      );
+      console.log(complaint)
+      // console.log(resolvedComplaintId)
+      // const complaint = await Complaint.findById(complaintId)
+      // console.log(complaint)
       await complaintReply.save();
       res.status(200).send({
         message: "complaint is successsfully resolved",

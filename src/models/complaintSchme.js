@@ -43,13 +43,17 @@ const ComplaintSchme = new mongoose.Schema(
     },
     status: {
       type: String,
-      emnum: ["Pending", "Assign To Staff", "Resolved"],
+      emnum: ["Pending", "Assigned", "Resolved"],
       default: "Pending"
     },
     staffId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
     },
+    resolvedComplaint:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref:"ComplaintResolved"
+    }
   },
   { timestamps: true }
 );
