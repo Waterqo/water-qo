@@ -22,7 +22,7 @@ const PlantsSchema = new mongoose.Schema({
     project:{
         type: String,
     },
-})
+}, {timestamps: ture})
 
 const Plant = mongoose.model("Plant", PlantsSchema)
 module.exports = Plant  
