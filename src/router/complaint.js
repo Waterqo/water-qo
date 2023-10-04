@@ -177,9 +177,11 @@ router.post("/complaint/resolved/:Id",
           console.log(err);
         }
       }
+      console.log(attachArtwork)
       const complaintId = req.params.Id;
+      console.log(complaintId)
       const text = req.body.text
-
+      console.log(text)
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
         text,
