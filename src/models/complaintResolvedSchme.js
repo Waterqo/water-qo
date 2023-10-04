@@ -5,6 +5,7 @@ const ComplaintResolvedSchme = new mongoose.Schema(
     complaintId: {
       type: mongoose.Schema.Types.ObjectId,
       require: true,
+      ref: "Complaint"
     },
     text: {
       type: String,

@@ -178,9 +178,11 @@ router.post("/complaint/resolved/:Id",
         }
       }
       const complaintId = req.params.Id;
+      const text = req.body.text
 
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
+        text,
         resolved: true,
         pics: attachArtwork.map((x) => x.url),
       });
@@ -220,6 +222,7 @@ router.get("/complaint/resolve", async (req, res) => {
     }
 
     const allComplain = await ComplaintResolved.find()
+      .populate("complaintId")
       .skip(skip)
       .limit(limit)
       .sort(sortBY)
