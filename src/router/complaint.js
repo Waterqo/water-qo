@@ -246,10 +246,20 @@ router.get("/complaint/resolve", async (req, res) => {
 
 router.get("/complaintStatus/:status", async (req, res) =>{ 
   try {
-    const status = req.params.status;
-    if (req.params.status = all){
-      const allComplaint = await Complaint 
+    const statusFind = req.params.status;
+
+    console.log(statusFind)
+    if (statusFind === "All"){
+      const allComplaint = await Complaint.find()
+      return res.status(200).send({success: true, data: allComplaint})
+    } else if(statusFind) {
+      const statusComplaint = await Complaint.find({status: statusFind})
+      if (statusComplaint >= 0) {
+        return res.status(400).send({success: false, message:"No Complaint Found"})
+      }
+      return res.status(200).send({success: true, data: statusComplaint})
     }
+    
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
