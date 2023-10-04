@@ -258,6 +258,7 @@ router.get("/complaintStatus/:status", async (req, res) =>{
     if (statusFind === "All"){
       const total = await Complaint.countDocuments();
       const allComplaint = await Complaint.find()
+        .populate("waterPlant")
         .skip(skip)
         .limit(limit)
         .sort(sortBY)
@@ -274,6 +275,7 @@ router.get("/complaintStatus/:status", async (req, res) =>{
     } else if(statusFind) {
       const total = await Complaint.countDocuments({status: statusFind});
       const statusComplaint = await Complaint.find({status: statusFind})
+        .populate("waterPlant")
         .skip(skip)
         .limit(limit)
         .sort(sortBY)
