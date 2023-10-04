@@ -280,9 +280,7 @@ router.get("/complaintStatus/:status", async (req, res) =>{
 
       const totalPages = Math.ceil(total   / limit);
 
-      if (statusComplaint >= 0) {
-        return res.status(400).send({success: false, message:"No Complaint Found"})
-      }
+      
       return res.status(200).send({
         success: true, 
         data: statusComplaint,
