@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const DailyVisitSchema = new mongoose.Schema(
   {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        require: true,
-        ref: "Admin"
+      type: mongoose.Schema.Types.ObjectId,
+      require: true,
+      ref: "Admin",
     },
     location: {
       type: String,
@@ -19,6 +19,6 @@ const DailyVisitSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const DailyVisit = mongoose.model( "DailyVisit", DailyVisitSchema );
+const DailyVisit = mongoose.model("DailyVisit", DailyVisitSchema);
 
 module.exports = DailyVisit;

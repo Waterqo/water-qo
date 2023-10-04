@@ -25,7 +25,7 @@ router.post(
           const uploader = await cloudinary.uploader.upload(path, {
             folder: "24-Karat",
           });
-          attachArtwork.push({ url: uploader.secure_url});
+          attachArtwork.push({ url: uploader.secure_url });
           fs.unlinkSync(path);
         } catch (err) {
           if (attachArtwork?.length) {
@@ -35,8 +35,13 @@ router.post(
           console.log(err);
         }
       }
-      const { nameOfComplainter,complaintBy, waterPlant, complaintCategory, complaint } =
-        req.body;
+      const {
+        nameOfComplainter,
+        complaintBy,
+        waterPlant,
+        complaintCategory,
+        complaint,
+      } = req.body;
       if (
         !nameOfComplainter ||
         !complaintBy ||
@@ -76,19 +81,18 @@ router.get("/complaints", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Complaint.countDocuments()
+    const total = await Complaint.countDocuments();
 
     let sortBY = { createdAt: -1 };
-    if(req.query.sort){
-      sortBY = JSON.parse(req.query.sort) 
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
     }
 
     const allComplain = await Complaint.find()
       .populate("waterPlant")
       .skip(skip)
       .limit(limit)
-      .sort(sortBY)
-
+      .sort(sortBY);
 
     if (!allComplain) {
       return res
@@ -96,17 +100,16 @@ router.get("/complaints", async (req, res) => {
         .send({ success: false, message: "No Complaint found! mubarak ho" });
     }
 
-    const totalPages = Math.ceil(total   / limit);
+    const totalPages = Math.ceil(total / limit);
 
-    res.status(200).send({ 
-      success: true, 
+    res.status(200).send({
+      success: true,
       data: allComplain,
-      page, 
-      totalPages, 
-      limit, 
-      total
+      page,
+      totalPages,
+      limit,
+      total,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
@@ -115,8 +118,8 @@ router.get("/complaints", async (req, res) => {
 
 router.get("/complaints/:Id", async (req, res) => {
   try {
-    const Id = req.params.Id
-    const allComplain = await Complaint.findById(Id).populate("waterPlant")
+    const Id = req.params.Id;
+    const allComplain = await Complaint.findById(Id).populate("waterPlant");
     if (!allComplain) {
       return res
         .status(400)
@@ -135,14 +138,13 @@ router.put("/assignstaff/:Id", async (req, res) => {
     const staffId = req.body.staffId;
     const updated = {
       staffId,
-      status: "Assigned"
-    }
+      status: "Assigned",
+    };
     const assignStaff = await Complaint.findByIdAndUpdate(
       complaintId,
       updated,
       { new: true }
     );
-      console.log(assignStaff)
     res.status(200).send({ message: "Staff added successfully!", assignStaff });
   } catch (error) {
     console.error(error);
@@ -150,7 +152,8 @@ router.put("/assignstaff/:Id", async (req, res) => {
   }
 });
 
-router.post("/complaint/resolved/:Id",
+router.post(
+  "/complaint/resolved/:Id",
   upload.array("attachArtwork", 5),
   async (req, res) => {
     const files = req.files;
@@ -167,7 +170,7 @@ router.post("/complaint/resolved/:Id",
           const uploader = await cloudinary.uploader.upload(path, {
             folder: "24-Karat",
           });
-          attachArtwork.push({ url: uploader.secure_url});
+          attachArtwork.push({ url: uploader.secure_url });
           fs.unlinkSync(path);
         } catch (err) {
           if (attachArtwork?.length) {
@@ -177,28 +180,25 @@ router.post("/complaint/resolved/:Id",
           console.log(err);
         }
       }
-      console.log(attachArtwork)
       const complaintId = req.params.Id;
-      console.log(complaintId)
-      const text = req.body.text
-      console.log(text)
+      const text = req.body.text;
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
         text,
         resolved: true,
         pics: attachArtwork.map((x) => x.url),
       });
-      const resolvedComplaint = complaintReply._id.toString()
+      const resolvedComplaint = complaintReply._id.toString();
       const updated = {
         resolvedComplaint,
-        status: "Resolved"
-      }
+        status: "Resolved",
+      };
       const complaint = await Complaint.findByIdAndUpdate(
         complaintId,
         updated,
         { new: true }
       );
-      
+
       await complaintReply.save();
       res.status(200).send({
         message: "complaint is successsfully resolved",
@@ -213,20 +213,20 @@ router.post("/complaint/resolved/:Id",
 
 router.get("/complaint/resolve/one/:id", async (req, res) => {
   try {
-    const resolvedId = req.params.id
-    console.log(resolvedId)
-    const allComplain = await ComplaintResolved.findById(resolvedId)
-      .populate("complaintId")
+    const resolvedId = req.params.id;
+    const allComplain = await ComplaintResolved.findById(resolvedId).populate(
+      "complaintId"
+    );
 
     if (!allComplain) {
       return res
         .status(400)
         .send({ success: false, message: "No Complaint found!" });
     }
-  
-    res.status(200).send({ 
-      success: true, 
-      data: allComplain, 
+
+    res.status(200).send({
+      success: true,
+      data: allComplain,
     });
   } catch (error) {
     console.error(error);
@@ -242,29 +242,29 @@ router.get("/complaint/resolve", async (req, res) => {
     const total = await ComplaintResolved.countDocuments();
 
     let sortBY = { createdAt: -1 };
-    if(req.query.sort){
-      sortBY = JSON.parse(req.query.sort) 
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
     }
 
     const allComplain = await ComplaintResolved.find()
       .populate("complaintId")
       .skip(skip)
       .limit(limit)
-      .sort(sortBY)
+      .sort(sortBY);
 
     if (!allComplain) {
       return res
         .status(400)
         .send({ success: false, message: "No Complaint found! mubarak ho" });
     }
-    const totalPages = Math.ceil(total   / limit);
-    res.status(200).send({ 
-      success: true, 
-      data: allComplain, 
-      page, 
-      totalPages, 
-      limit, 
-      total
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).send({
+      success: true,
+      data: allComplain,
+      page,
+      totalPages,
+      limit,
+      total,
     });
   } catch (error) {
     console.error(error);
@@ -272,58 +272,57 @@ router.get("/complaint/resolve", async (req, res) => {
   }
 });
 
-router.get("/complaintStatus/:status", async (req, res) =>{ 
+router.get("/complaintStatus/:status", async (req, res) => {
   try {
     const statusFind = req.params.status;
     const limit = parseInt(req.query.limit, 10) || 10;
     const page = parseInt(req.query.page, 10) || 1;
     const skip = (page - 1) * limit;
-    
+
     let sortBY = { createdAt: -1 };
-    if(req.query.sort){
-      sortBY = JSON.parse(req.query.sort) 
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
     }
-    if (statusFind === "All"){
+    if (statusFind === "All") {
       const total = await Complaint.countDocuments();
       const allComplaint = await Complaint.find()
         .populate("waterPlant")
         .skip(skip)
         .limit(limit)
-        .sort(sortBY)
-      
-      const totalPages = Math.ceil(total   / limit);
+        .sort(sortBY);
+
+      const totalPages = Math.ceil(total / limit);
       return res.status(200).send({
-        success: true, 
+        success: true,
         data: allComplaint,
-        page, 
-        totalPages, 
-        limit, 
-        total
-      })
-    } else if(statusFind) {
-      const total = await Complaint.countDocuments({status: statusFind});
-      const statusComplaint = await Complaint.find({status: statusFind})
+        page,
+        totalPages,
+        limit,
+        total,
+      });
+    } else if (statusFind) {
+      const total = await Complaint.countDocuments({ status: statusFind });
+      const statusComplaint = await Complaint.find({ status: statusFind })
         .populate("waterPlant")
         .skip(skip)
         .limit(limit)
-        .sort(sortBY)
+        .sort(sortBY);
 
-      const totalPages = Math.ceil(total   / limit);
+      const totalPages = Math.ceil(total / limit);
 
-      
       return res.status(200).send({
-        success: true, 
+        success: true,
         data: statusComplaint,
-        page, 
-        totalPages, 
-        limit, 
-        total
-      })
+        page,
+        totalPages,
+        limit,
+        total,
+      });
     }
-    
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 });
+
 module.exports = router;

@@ -19,7 +19,7 @@ router.post("/visits", upload.array("attachArtwork", 5), async (req, res) => {
         const uploader = await cloudinary.uploader.upload(path, {
           folder: "24-Karat",
         });
-        attachArtwork.push({  url: uploader.secure_url });
+        attachArtwork.push({ url: uploader.secure_url });
         fs.unlinkSync(path);
       } catch (err) {
         if (attachArtwork?.length) {
@@ -55,26 +55,26 @@ router.get("/all/visits", async (req, res) => {
     const total = await DailyVisit.countDocuments();
 
     let sortBY = { createdAt: -1 };
-    if(req.query.sort){
-      sortBY = JSON.parse(req.query.sort) 
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
     }
 
     const allVisits = await DailyVisit.find()
       .skip(skip)
       .limit(limit)
-      .sort(sortBY)
+      .sort(sortBY);
 
     if (!allVisits.length > 0) {
       return res.status(400).send({ message: "no Visits found" });
     }
-    const totalPages = Math.ceil(total   / limit);
-    res.status(200).send({ 
-      success: true, 
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).send({
+      success: true,
       data: allVisits,
-      page, 
-      totalPages, 
-      limit, 
-      total
+      page,
+      totalPages,
+      limit,
+      total,
     });
   } catch (error) {
     console.error(error);
@@ -84,7 +84,7 @@ router.get("/all/visits", async (req, res) => {
 
 router.get("/one/visits/:visitId", async (req, res) => {
   try {
-    const visitId = req.params.visitId
+    const visitId = req.params.visitId;
 
     const allVisits = await DailyVisit.findById(visitId);
 

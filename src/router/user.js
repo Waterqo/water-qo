@@ -15,7 +15,7 @@ const { AdminJoiSchema, ClientJoiSchme } = require("../helper/joi/joiSchema");
 router.post("/register/client", ClientJoiSchme, async (req, res) => {
   try {
     const { name, contact_number, email, password, waterPlant } = req.body;
-    if (!name || !contact_number || !email || !password ) {
+    if (!name || !contact_number || !email || !password) {
       return res.status(400).send({
         success: false,
         message: "Kindly provide complete information.",
@@ -64,12 +64,10 @@ router.post("/register/admin", AdminJoiSchema, async (req, res) => {
 
     const existingUser = await Admin.findOne({ email: req.body.email });
     if (existingUser) {
-      return res
-        .status(400)
-        .send({
-          success: false,
-          message: "The email is already registered go to login!",
-        });
+      return res.status(400).send({
+        success: false,
+        message: "The email is already registered go to login!",
+      });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -105,12 +103,10 @@ router.post("/register/Staff", AdminJoiSchema, async (req, res) => {
 
     const existingUser = await Staff.findOne({ email: req.body.email });
     if (existingUser) {
-      return res
-        .status(400)
-        .send({
-          success: false,
-          message: "The email is already registered go to login!",
-        });
+      return res.status(400).send({
+        success: false,
+        message: "The email is already registered go to login!",
+      });
     }
 
     const salt = await bcrypt.genSalt(10);

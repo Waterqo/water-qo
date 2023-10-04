@@ -1,4 +1,4 @@
-  const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
 const ComplaintSchme = new mongoose.Schema(
   {
@@ -9,7 +9,7 @@ const ComplaintSchme = new mongoose.Schema(
     complaintBy: {
       type: String,
       require: true,
-      enum: ["Visitor", "Coustomer", "Staff"]
+      enum: ["Visitor", "Coustomer", "Staff"],
     },
     waterPlant: {
       type: mongoose.Schema.Types.ObjectId,
@@ -44,16 +44,16 @@ const ComplaintSchme = new mongoose.Schema(
     status: {
       type: String,
       emnum: ["Pending", "Assigned", "Resolved"],
-      default: "Pending"
+      default: "Pending",
     },
     staffId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Admin",
     },
-    resolvedComplaint:{
+    resolvedComplaint: {
       type: mongoose.Schema.Types.ObjectId,
-      ref:"ComplaintResolved"
-    }
+      ref: "ComplaintResolved",
+    },
   },
   { timestamps: true }
 );

@@ -27,9 +27,9 @@ const StaffSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    complaintAssign:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref:"Complaint"
+    complaintAssign: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Complaint",
     },
     role: String,
   },
