@@ -52,7 +52,7 @@ router.get("/all/visits", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await ComplaintResolved.countDocuments();
+    const total = await DailyVisit.countDocuments();
 
     let sortBY = { createdAt: -1 };
     if(req.query.sort){

@@ -194,10 +194,7 @@ router.post("/complaint/resolved/:Id",
         updated,
         { new: true }
       );
-      console.log(complaint)
-      // console.log(resolvedComplaintId)
-      // const complaint = await Complaint.findById(complaintId)
-      // console.log(complaint)
+      
       await complaintReply.save();
       res.status(200).send({
         message: "complaint is successsfully resolved",
@@ -247,4 +244,15 @@ router.get("/complaint/resolve", async (req, res) => {
   }
 });
 
+router.get("/complaintStatus/:status", async (req, res) =>{ 
+  try {
+    const status = req.params.status;
+    if (req.params.status = all){
+      const allComplaint = await Complaint 
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
 module.exports = router;
