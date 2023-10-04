@@ -211,6 +211,29 @@ router.post("/complaint/resolved/:Id",
   }
 );
 
+router.get("/complaint/resolve/one/:id", async (req, res) => {
+  try {
+    const resolvedId = req.params.id
+    console.log(resolvedId)
+    const allComplain = await ComplaintResolved.findById(resolvedId)
+      .populate("complaintId")
+
+    if (!allComplain) {
+      return res
+        .status(400)
+        .send({ success: false, message: "No Complaint found!" });
+    }
+  
+    res.status(200).send({ 
+      success: true, 
+      data: allComplain, 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
 router.get("/complaint/resolve", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
