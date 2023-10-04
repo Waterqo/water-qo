@@ -247,17 +247,50 @@ router.get("/complaint/resolve", async (req, res) => {
 router.get("/complaintStatus/:status", async (req, res) =>{ 
   try {
     const statusFind = req.params.status;
-
-    console.log(statusFind)
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const page = parseInt(req.query.page, 10) || 1;
+    const skip = (page - 1) * limit;
+    
+    let sortBY = { createdAt: -1 };
+    if(req.query.sort){
+      sortBY = JSON.parse(req.query.sort) 
+    }
     if (statusFind === "All"){
+      const total = await Complaint.countDocuments();
       const allComplaint = await Complaint.find()
-      return res.status(200).send({success: true, data: allComplaint})
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY)
+      
+      const totalPages = Math.ceil(total   / limit);
+      return res.status(200).send({
+        success: true, 
+        data: allComplaint,
+        page, 
+        totalPages, 
+        limit, 
+        total
+      })
     } else if(statusFind) {
+      const total = await Complaint.countDocuments({status: statusFind});
       const statusComplaint = await Complaint.find({status: statusFind})
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY)
+
+      const totalPages = Math.ceil(total   / limit);
+
       if (statusComplaint >= 0) {
         return res.status(400).send({success: false, message:"No Complaint Found"})
       }
-      return res.status(200).send({success: true, data: statusComplaint})
+      return res.status(200).send({
+        success: true, 
+        data: statusComplaint,
+        page, 
+        totalPages, 
+        limit, 
+        total
+      })
     }
     
   } catch (error) {
