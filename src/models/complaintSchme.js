@@ -9,7 +9,7 @@ const ComplaintSchme = new mongoose.Schema(
     complaintBy: {
       type: String,
       require: true,
-      enum: ["Visitor", "Coustomer", "Staff", "Admin"],
+      enum: ["Visitor", "WASA", "Staff", "Admin"],
     },
     waterPlant: {
       type: mongoose.Schema.Types.ObjectId,
