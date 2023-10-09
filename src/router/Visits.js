@@ -60,10 +60,11 @@ router.get("/all/visits", async (req, res) => {
     }
 
     const allVisits = await DailyVisit.find()
+      .populate({ path: "location", select: "address" })
+      .populate({ path: "userId", select: "name contact_number" })
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
-
     if (!allVisits.length > 0) {
       return res.status(400).send({ message: "no Visits found" });
     }
@@ -86,7 +87,9 @@ router.get("/one/visits/:visitId", async (req, res) => {
   try {
     const visitId = req.params.visitId;
 
-    const allVisits = await DailyVisit.findById(visitId);
+    const allVisits = await DailyVisit.findById(visitId)
+      .populate("userId")
+      .populate("location");
 
     if (!allVisits) {
       return res.status(400).send({ message: "no Visits found" });

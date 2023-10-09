@@ -5,10 +5,11 @@ const DailyVisitSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       require: true,
-      ref: "Admin",
+      ref: "Staff",
     },
     location: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Plant",
       require: true,
     },
     pics: {
