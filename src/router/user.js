@@ -29,6 +29,20 @@ router.post("/register/client", ClientJoiSchme, async (req, res) => {
         message: "The email is already registered go to login!",
       });
     }
+    const existingUserAdmin = await Admin.findOne({ email: req.body.email });
+    if (existingUserAdmin) {
+      return res.status(400).send({
+        success: false,
+        message: "The email is already registered as Admin!",
+      });
+    }
+    const existingUserStaff = await Staff.findOne({ email: req.body.email });
+    if (existingUserStaff) {
+      return res.status(400).send({
+        success: false,
+        message: "The email is already registered as Staff!",
+      });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
@@ -62,11 +76,25 @@ router.post("/register/admin", AdminJoiSchema, async (req, res) => {
       });
     }
 
-    const existingUser = await Admin.findOne({ email: req.body.email });
+    const existingUser = await Client.findOne({ email: req.body.email });
     if (existingUser) {
       return res.status(400).send({
         success: false,
-        message: "The email is already registered go to login!",
+        message: "The email is already registered Client!",
+      });
+    }
+    const existingUserAdmin = await Admin.findOne({ email: req.body.email });
+    if (existingUserAdmin) {
+      return res.status(400).send({
+        success: false,
+        message: "The email is already registered as Admin!",
+      });
+    }
+    const existingUserStaff = await Staff.findOne({ email: req.body.email });
+    if (existingUserStaff) {
+      return res.status(400).send({
+        success: false,
+        message: "The email is already registered as Staff!",
       });
     }
 
@@ -101,13 +129,28 @@ router.post("/register/Staff", AdminJoiSchema, async (req, res) => {
       });
     }
 
-    const existingUser = await Staff.findOne({ email: req.body.email });
+    const existingUser = await Client.findOne({ email: req.body.email });
     if (existingUser) {
       return res.status(400).send({
         success: false,
-        message: "The email is already registered go to login!",
+        message: "The email is already registered Client!",
       });
     }
+    const existingUserAdmin = await Admin.findOne({ email: req.body.email });
+    if (existingUserAdmin) {
+      return res.status(400).send({
+        success: false,
+        message: "The email is already registered as Admin!",
+      });
+    }
+    const existingUserStaff = await Staff.findOne({ email: req.body.email });
+    if (existingUserStaff) {
+      return res.status(400).send({
+        success: false,
+        message: "The email is already registered as Staff!",
+      });
+    }
+    s;
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
