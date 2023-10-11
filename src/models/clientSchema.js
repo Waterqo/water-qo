@@ -34,6 +34,7 @@ const ClientSchema = new mongoose.Schema(
       },
     ],
     role: String,
+    deviceToken: String,
   },
   { timestamps: true }
 );

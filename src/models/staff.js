@@ -32,6 +32,7 @@ const StaffSchema = new mongoose.Schema(
       ref: "Complaint",
     },
     role: String,
+    deviceToken: String,
   },
   { timestamps: true }
 );

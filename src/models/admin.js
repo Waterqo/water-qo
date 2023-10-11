@@ -28,6 +28,7 @@ const AdminSchema = new mongoose.Schema(
       required: true,
     },
     role: String,
+    deviceToken: String,
   },
   { timestamps: true }
 );

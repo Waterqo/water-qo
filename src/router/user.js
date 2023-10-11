@@ -5,11 +5,11 @@ const {
   verifyClient,
   verifyStaff,
 } = require("../middlewares/verify");
-const Admin = require("../models/admin");
-const Client = require("../models/clientSchema");
-const Staff = require("../models/staff");
-const JWT = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const JWT = require("jsonwebtoken");
+const Admin = require("../models/admin");
+const Staff = require("../models/staff");
+const Client = require("../models/clientSchema");
 const { AdminJoiSchema, ClientJoiSchme } = require("../helper/joi/joiSchema");
 
 router.post("/register/client", ClientJoiSchme, async (req, res) => {
@@ -348,14 +348,14 @@ router.get("/find/staff/:userId", async (req, res) => {
 router.put("/update/client", verifyClient, async (req, res) => {
   try {
     const userId = req.user;
-    const { name, contact_number, email, password, address, city } = req.body;
+    const { name, contact_number, email, waterPlant, deviceToken } = req.body;
     const user = await Client.findById(userId);
 
     user.name = name || user.name;
     user.contact_number = contact_number || user.contact_number;
     user.email = email || user.email;
-    user.address = address || user.address;
-    user.city = city || user.city;
+    user.waterPlant = waterPlant || user.waterPlant;
+    user.deviceToken = deviceToken || user.deviceToken;
 
     if (password) {
       const salt = await bcrypt.genSalt(10);
@@ -378,12 +378,13 @@ router.put("/update/client", verifyClient, async (req, res) => {
 router.put("/update/admin", verifyAdmin, async (req, res) => {
   try {
     const userId = req.user;
-    const { name, contact_number, email, password } = req.body;
+    const { name, contact_number, email, password, deviceToken } = req.body;
     const user = await Admin.findById(userId);
 
     user.name = name || user.name;
     user.contact_number = contact_number || user.contact_number;
     user.email = email || user.email;
+    user.deviceToken = deviceToken || user.deviceToken;
 
     if (password) {
       const salt = await bcrypt.genSalt(10);
@@ -406,12 +407,13 @@ router.put("/update/admin", verifyAdmin, async (req, res) => {
 router.put("/update/staff", verifyStaff, async (req, res) => {
   try {
     const userId = req.user;
-    const { name, contact_number, email, password } = req.body;
+    const { name, contact_number, email, password, deviceToken } = req.body;
     const user = await Staff.findById(userId);
 
     user.name = name || user.name;
     user.contact_number = contact_number || user.contact_number;
     user.email = email || user.email;
+    user.deviceToken = deviceToken || user.deviceToken;
 
     if (password) {
       const salt = await bcrypt.genSalt(10);
