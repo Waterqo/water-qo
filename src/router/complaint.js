@@ -98,7 +98,7 @@ router.post(
           complaint,
           status: "Pending",
           pics: attachArtwork.map((x) => x.url),
-          clientID: userId,
+          adminID: userId,
           role: "Admin",
         });
       }
@@ -111,7 +111,7 @@ router.post(
           complaint,
           status: "Pending",
           pics: attachArtwork.map((x) => x.url),
-          clientID: userId,
+          staffID: userId,
           role: "Staff",
         });
       }
