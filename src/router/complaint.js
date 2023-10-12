@@ -449,12 +449,133 @@ router.get("/complaintByPlant/:Id", async (req, res) => {
   }
 });
 
+router.get("/complaintclient/:Id", async (req, res) => {
+  try {
+    const plantId = req.params.Id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Complaint.countDocuments({ clientID: plantId });
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+
+    const plantComplaint = await Complaint.find({ clientID: plantId })
+      .populate("waterPlant")
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+
+    if (!plantComplaint) {
+      return res
+        .status(400)
+        .send({ message: "No complaint found on that plant" });
+    }
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).send({
+      success: true,
+      data: plantComplaint,
+      page,
+      totalPages,
+      limit,
+      total,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server error!");
+  }
+});
+
+router.get("/complaintAdmin/:Id", async (req, res) => {
+  try {
+    const plantId = req.params.Id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Complaint.countDocuments({ adminID: plantId });
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+
+    const plantComplaint = await Complaint.find({ adminID: plantId })
+      .populate("waterPlant")
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+
+    if (!plantComplaint) {
+      return res
+        .status(400)
+        .send({ message: "No complaint found on that plant" });
+    }
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).send({
+      success: true,
+      data: plantComplaint,
+      page,
+      totalPages,
+      limit,
+      total,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server error!");
+  }
+});
+
+router.get("/complaintStaff/:Id", async (req, res) => {
+  try {
+    const plantId = req.params.Id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Complaint.countDocuments({ staffID: plantId });
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+
+    const plantComplaint = await Complaint.find({ staffID: plantId })
+      .populate("waterPlant")
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+
+    if (!plantComplaint) {
+      return res
+        .status(400)
+        .send({ message: "No complaint found on that plant" });
+    }
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).send({
+      success: true,
+      data: plantComplaint,
+      page,
+      totalPages,
+      limit,
+      total,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server error!");
+  }
+});
+
 router.put("/comment/:Id", async (req, res) => {
   try {
     const resolvedId = req.params.Id;
     const comment = req.body.comment;
-    const complaint = await ComplaintResolved.findById(resolvedId);
-    complaint.comment = comment || complaint.comment;
+    console.log(comment);
+    // const complaint = await ComplaintResolved.findById(resolvedId);
+
     await complaint.save();
 
     return res.status(200).send({ success: true, data: complaint });

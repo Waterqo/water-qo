@@ -14,9 +14,16 @@ const ComplaintResolvedSchme = new mongoose.Schema(
       type: Array,
       require: true,
     },
-    comment: {
-      type: String,
-    },
+    comment: [
+      {
+        client: {
+          type: String,
+        },
+        admin: {
+          type: String,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
