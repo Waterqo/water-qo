@@ -47,19 +47,20 @@ router.post("/visits", upload.array("attachArtwork", 5), async (req, res) => {
   }
 });
 
-router.get("/all/visits", async (req, res) => {
+router.get("/all/visits:Id", async (req, res) => {
   try {
+    const staffID = req.param.Id;
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await DailyVisit.countDocuments();
+    const total = await DailyVisit.countDocuments({ userId: staffId });
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
 
-    const allVisits = await DailyVisit.find()
+    const allVisits = await DailyVisit.find({ userId: staffId })
       .populate({ path: "location", select: "address" })
       .populate({ path: "userId", select: "name contact_number" })
       .skip(skip)
