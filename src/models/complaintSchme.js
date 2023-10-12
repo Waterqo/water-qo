@@ -6,11 +6,6 @@ const ComplaintSchme = new mongoose.Schema(
       type: String,
       required: true,
     },
-    complaintBy: {
-      type: String,
-      require: true,
-      enum: ["Visitor", "WASA", "Staff", "Admin"],
-    },
     waterPlant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Plant",
@@ -53,6 +48,23 @@ const ComplaintSchme = new mongoose.Schema(
     resolvedComplaint: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ComplaintResolved",
+    },
+    clientID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Client",
+    },
+    adminID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+    staffID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Client",
+    },
+    role: {
+      type: String,
+      enum: ["Client", "Admin", "Staff"],
+      require: true,
     },
   },
   { timestamps: true }

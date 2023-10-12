@@ -2,6 +2,7 @@ const router = require("express").Router();
 const cloudinary = require("../helper/cloudinary");
 const fs = require("fs");
 const Staff = require("../models/staff");
+const Client = require("../models/clientSchema");
 const Admin = require("../models/admin");
 const upload = require("../helper/multer");
 const Complaint = require("../models/complaintSchme");
@@ -33,7 +34,7 @@ const { ComplaintJoiSchema } = require("../helper/joi/joiSchema");
 // };
 
 router.post(
-  "/create/complaint",
+  "/create/complaint/:Id",
   upload.array("attachArtwork", 5),
   ComplaintJoiSchema,
   async (req, res) => {
@@ -61,16 +62,11 @@ router.post(
           console.log(err);
         }
       }
-      const {
-        nameOfComplainter,
-        complaintBy,
-        waterPlant,
-        complaintCategory,
-        complaint,
-      } = req.body;
+      const userId = req.params.Id;
+      const { nameOfComplainter, waterPlant, complaintCategory, complaint } =
+        req.body;
       if (
         !nameOfComplainter ||
-        !complaintBy ||
         !waterPlant ||
         !complaintCategory ||
         !complaint
@@ -79,16 +75,46 @@ router.post(
           .status(400)
           .send({ success: false, message: "kindle provide all the details" });
       }
-
-      const newComplaint = new Complaint({
-        nameOfComplainter,
-        complaintBy,
-        waterPlant,
-        complaintCategory,
-        complaint,
-        status: "Pending",
-        pics: attachArtwork.map((x) => x.url),
-      });
+      const user = await Client.findById(userId);
+      let newComplaint;
+      if (user) {
+        newComplaint = new Complaint({
+          nameOfComplainter,
+          waterPlant,
+          complaintCategory,
+          complaint,
+          status: "Pending",
+          pics: attachArtwork.map((x) => x.url),
+          clientID: userId,
+          role: "Client",
+        });
+      }
+      const userAdmin = await Admin.findById(userId);
+      if (userAdmin) {
+        newComplaint = new Complaint({
+          nameOfComplainter,
+          waterPlant,
+          complaintCategory,
+          complaint,
+          status: "Pending",
+          pics: attachArtwork.map((x) => x.url),
+          clientID: userId,
+          role: "Admin",
+        });
+      }
+      const userStaff = await Staff.findById(userId);
+      if (userStaff) {
+        newComplaint = new Complaint({
+          nameOfComplainter,
+          waterPlant,
+          complaintCategory,
+          complaint,
+          status: "Pending",
+          pics: attachArtwork.map((x) => x.url),
+          clientID: userId,
+          role: "Staff",
+        });
+      }
 
       const admin = await Admin.find();
       let tokendeviceArray = [];
@@ -110,9 +136,8 @@ router.post(
         deviceToken.forEach((eachToken) => {
           sendNotification(title, body, eachToken, ID);
         });
-
       await newComplaint.save();
-      return res.status(200).send({
+      res.status(200).send({
         success: true,
         message: "your complaint is send successfully",
         data: newComplaint,
