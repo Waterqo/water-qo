@@ -449,4 +449,19 @@ router.get("/complaintByPlant/:Id", async (req, res) => {
   }
 });
 
+router.put("/comment/:Id", async (req, res) => {
+  try {
+    const resolvedId = req.params.Id;
+    const comment = req.body.comment;
+    const complaint = await ComplaintResolved.findById(resolvedId);
+    complaint.comment = comment || complaint.comment;
+    await complaint.save();
+
+    return res.status(200).send({ success: true, data: complaint });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("internal server error");
+  }
+});
+
 module.exports = router;
