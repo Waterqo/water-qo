@@ -1,10 +1,36 @@
 const router = require("express").Router();
 const cloudinary = require("../helper/cloudinary");
 const fs = require("fs");
+const Staff = require("../models/staff");
+const Admin = require("../models/admin");
 const upload = require("../helper/multer");
 const Complaint = require("../models/complaintSchme");
 const ComplaintResolved = require("../models/complaintResolvedSchme");
 const { ComplaintJoiSchema } = require("../helper/joi/joiSchema");
+// var FCM = require("fcm-node");
+// var fcm = new FCM(serverKey);
+// var serverKey = process.env.SERVERKEY;
+
+// const sendNotification = async (title, body, deviceToken, ID) => {
+//   const message = {
+//     notification: {
+//       title: title,
+//       body: body,
+//     },
+//     to: deviceToken,
+//     data: {
+//       my_key: ID,
+//     },
+//   };
+
+//   fcm.send(message, function (err, response) {
+//     if (err) {
+//       console.log("Something has gone wrong!");
+//     } else {
+//       console.log("Successfully sent with response: ", response);
+//     }
+//   });
+// };
 
 router.post(
   "/create/complaint",
@@ -63,6 +89,28 @@ router.post(
         status: "Pending",
         pics: attachArtwork.map((x) => x.url),
       });
+
+      const admin = await Admin.find();
+      let tokendeviceArray = [];
+      for (let index = 0; index < admin.length; index++) {
+        const element = admin[index];
+        element.devicetoken == undefined
+          ? " "
+          : tokendeviceArray.push(element.devicetoken);
+      }
+      const newdeviceToken = tokendeviceArray.filter(
+        (item, index) => tokendeviceArray.indexOf(item) === index
+      );
+      const ID = newComplaint._id;
+      const title = "A new complaint is added";
+      const body = `Hello Admin, A new Complaint is added !`;
+      const deviceToken = newdeviceToken;
+
+      deviceToken.length > 0 &&
+        deviceToken.forEach((eachToken) => {
+          sendNotification(title, body, eachToken, ID);
+        });
+
       await newComplaint.save();
       return res.status(200).send({
         success: true,
@@ -145,6 +193,17 @@ router.put("/assignstaff/:Id", async (req, res) => {
       updated,
       { new: true }
     );
+
+    const staff = await Staff.findById(staffId);
+
+    const name = staff.name;
+    const deviceToken = staff.deviceToken;
+    const ID = complaintId;
+    const title = "A new complaint is assign to you";
+    const body = `Hello ${name}, A new Complaint is asssign to you`;
+
+    sendNotification(title, body, deviceToken, ID);
+
     res.status(200).send({ message: "Staff added successfully!", assignStaff });
   } catch (error) {
     console.error(error);

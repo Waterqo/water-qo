@@ -150,7 +150,6 @@ router.post("/register/Staff", AdminJoiSchema, async (req, res) => {
         message: "The email is already registered as Staff!",
       });
     }
-    s;
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
