@@ -47,7 +47,7 @@ router.post("/visits", upload.array("attachArtwork", 5), async (req, res) => {
   }
 });
 
-router.get("/all/visits:Id", async (req, res) => {
+router.get("/all/visits/:Id", async (req, res) => {
   try {
     const staffID = req.params.Id;
     console.log(staffID);
