@@ -449,9 +449,12 @@ router.get("/complaintByPlant/:Id", async (req, res) => {
   }
 });
 
-router.get("/complaintclient/:Id", async (req, res) => {
+router.get("/complaintclient/:Id/:status", async (req, res) => {
   try {
     const plantId = req.params.Id;
+    const statusFind = req.params.status;
+    console.log(statusFind);
+
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
@@ -460,6 +463,32 @@ router.get("/complaintclient/:Id", async (req, res) => {
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
+    }
+
+    if (statusFind != ":status") {
+      const total = await Complaint.countDocuments({
+        status: statusFind,
+        clientID: plantId,
+      });
+      const statusComplaint = await Complaint.find({
+        status: statusFind,
+        clientID: plantId,
+      })
+        .populate("waterPlant")
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return res.status(200).send({
+        success: true,
+        data: statusComplaint,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
     }
 
     const plantComplaint = await Complaint.find({ clientID: plantId })
@@ -489,17 +518,46 @@ router.get("/complaintclient/:Id", async (req, res) => {
   }
 });
 
-router.get("/complaintAdmin/:Id", async (req, res) => {
+router.get("/complaintAdmin/:Id/:status", async (req, res) => {
   try {
     const plantId = req.params.Id;
+    const statusFind = req.params.status;
+    console.log(statusFind);
+
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Complaint.countDocuments({ adminID: plantId });
+    const total = await Complaint.countDocuments({ clientID: plantId });
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
+    }
+
+    if (statusFind != ":status") {
+      const total = await Complaint.countDocuments({
+        status: statusFind,
+        adminID: plantId,
+      });
+      const statusComplaint = await Complaint.find({
+        status: statusFind,
+        adminID: plantId,
+      })
+        .populate("waterPlant")
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return res.status(200).send({
+        success: true,
+        data: statusComplaint,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
     }
 
     const plantComplaint = await Complaint.find({ adminID: plantId })
@@ -529,17 +587,46 @@ router.get("/complaintAdmin/:Id", async (req, res) => {
   }
 });
 
-router.get("/complaintStaff/:Id", async (req, res) => {
+router.get("/complaintStaff/:Id/:status", async (req, res) => {
   try {
     const plantId = req.params.Id;
+    const statusFind = req.params.status;
+    console.log(statusFind);
+
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Complaint.countDocuments({ staffID: plantId });
+    const total = await Complaint.countDocuments({ clientID: plantId });
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
+    }
+
+    if (statusFind != ":status") {
+      const total = await Complaint.countDocuments({
+        status: statusFind,
+        staffID: plantId,
+      });
+      const statusComplaint = await Complaint.find({
+        status: statusFind,
+        staffID: plantId,
+      })
+        .populate("waterPlant")
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return res.status(200).send({
+        success: true,
+        data: statusComplaint,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
     }
 
     const plantComplaint = await Complaint.find({ staffID: plantId })
@@ -574,10 +661,9 @@ router.put("/comment/:Id", async (req, res) => {
     const resolvedId = req.params.Id;
     const comment = req.body.comment;
     console.log(comment);
-    // const complaint = await ComplaintResolved.findById(resolvedId);
-
-    await complaint.save();
-
+    const complaint = await ComplaintResolved.findById(resolvedId);
+    complaint.comment.push(comment);
+    console.log(complaint.comment);
     return res.status(200).send({ success: true, data: complaint });
   } catch (error) {
     console.error(error);
