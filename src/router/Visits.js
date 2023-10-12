@@ -85,6 +85,42 @@ router.get("/all/visits/:Id", async (req, res) => {
   }
 });
 
+router.get("/all/visits", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await DailyVisit.countDocuments();
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+
+    const allVisits = await DailyVisit.find()
+      .populate({ path: "location", select: "address" })
+      .populate({ path: "userId", select: "name contact_number" })
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+    if (!allVisits.length > 0) {
+      return res.status(400).send({ message: "no Visits found" });
+    }
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).send({
+      success: true,
+      data: allVisits,
+      page,
+      totalPages,
+      limit,
+      total,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
 router.get("/one/visits/:visitId", async (req, res) => {
   try {
     const visitId = req.params.visitId;

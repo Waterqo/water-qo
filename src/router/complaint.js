@@ -465,7 +465,7 @@ router.get("/complaintclient/:Id/:status", async (req, res) => {
       sortBY = JSON.parse(req.query.sort);
     }
 
-    if (statusFind != ":status") {
+    if (statusFind != "All") {
       const total = await Complaint.countDocuments({
         status: statusFind,
         clientID: plantId,
@@ -489,29 +489,29 @@ router.get("/complaintclient/:Id/:status", async (req, res) => {
         limit,
         total,
       });
+    } else if (statusFind == "All") {
+      const plantComplaint = await Complaint.find({ clientID: plantId })
+        .populate("waterPlant")
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+
+      if (!plantComplaint) {
+        return res
+          .status(400)
+          .send({ message: "No complaint found on that plant" });
+      }
+      const totalPages = Math.ceil(total / limit);
+
+      res.status(200).send({
+        success: true,
+        data: plantComplaint,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
     }
-
-    const plantComplaint = await Complaint.find({ clientID: plantId })
-      .populate("waterPlant")
-      .skip(skip)
-      .limit(limit)
-      .sort(sortBY);
-
-    if (!plantComplaint) {
-      return res
-        .status(400)
-        .send({ message: "No complaint found on that plant" });
-    }
-    const totalPages = Math.ceil(total / limit);
-
-    res.status(200).send({
-      success: true,
-      data: plantComplaint,
-      page,
-      totalPages,
-      limit,
-      total,
-    });
   } catch (error) {
     console.error(error);
     return res.status(500).send("Internal server error!");
