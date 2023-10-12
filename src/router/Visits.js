@@ -49,18 +49,19 @@ router.post("/visits", upload.array("attachArtwork", 5), async (req, res) => {
 
 router.get("/all/visits:Id", async (req, res) => {
   try {
-    const staffID = req.param.Id;
+    const staffID = req.params.Id;
+    console.log(staffID);
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await DailyVisit.countDocuments({ userId: staffId });
+    const total = await DailyVisit.countDocuments({ userId: staffID });
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
 
-    const allVisits = await DailyVisit.find({ userId: staffId })
+    const allVisits = await DailyVisit.find({ userId: staffID })
       .populate({ path: "location", select: "address" })
       .populate({ path: "userId", select: "name contact_number" })
       .skip(skip)
