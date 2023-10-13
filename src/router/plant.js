@@ -1,5 +1,6 @@
 const Plant = require("../models/plants");
 const router = require("express").Router();
+const Client = require("../models/clientSchema");
 
 router.post("/added", async (req, res) => {
   try {
@@ -16,6 +17,40 @@ router.post("/added", async (req, res) => {
   }
 });
 
+router.get("/all/:Id", async (req, res) => {
+  try {
+    const UserId = req.params.Id;
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Plant.countDocuments();
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+    const user = await Client.findById(UserId);
+    const plantId = user.waterPlant;
+    const allPlant = await Plant.findById(plantId)
+      .select("short_id address")
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+    console.log(allPlant);
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).send({
+      success: true,
+      data: allPlant,
+      page,
+      totalPages,
+      limit,
+      total,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
 router.get("/all", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
@@ -94,4 +129,5 @@ router.get("/search/:address", async (req, res, next) => {
     res.status(500).send({ message: "Internal server error" });
   }
 });
+
 module.exports = router;
