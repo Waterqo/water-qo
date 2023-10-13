@@ -42,11 +42,11 @@ router.post(
     const files = req.files;
     const attachArtwork = [];
     try {
-      if (!files || files?.length < 1)
-        return res.status(401).json({
-          success: false,
-          message: "You have to upload at least one image to the listing",
-        });
+      // if (!files || files?.length < 1)
+      //   return res.status(401).json({
+      //     success: false,
+      //     message: "You have to upload at least one image to the listing",
+      //   });
       for (const file of files) {
         const { path } = file;
         try {
@@ -592,7 +592,6 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
   try {
     const plantId = req.params.Id;
     const statusFind = req.params.status;
-    console.log(statusFind);
 
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
