@@ -36,7 +36,7 @@ router.get("/all/:Id", async (req, res) => {
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
-    if (allPlant == null) {
+    if (allPlant == "null") {
       const allPlant = [];
       const totalPages = Math.ceil(total / limit);
       return res.status(200).send({
@@ -100,7 +100,7 @@ router.get("/one/:id", async (req, res) => {
   try {
     const address = req.params.id;
     const plant = await Plant.findById(address);
-    if (plant.length <= 0) {
+    if (plant == null) {
       return res
         .status(400)
         .send({ success: false, message: "No Plant found on that location" });

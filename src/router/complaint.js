@@ -528,14 +528,14 @@ router.get("/complaintAdmin/:Id/:status", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Complaint.countDocuments({ clientID: plantId });
+    const total = await Complaint.countDocuments({ adminID: plantId });
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
 
-    if (statusFind != ":status") {
+    if (statusFind != "All") {
       const total = await Complaint.countDocuments({
         status: statusFind,
         adminID: plantId,
@@ -597,14 +597,14 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Complaint.countDocuments({ clientID: plantId });
+    const total = await Complaint.countDocuments({ staffID: plantId });
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
 
-    if (statusFind != ":status") {
+    if (statusFind != "All") {
       const total = await Complaint.countDocuments({
         status: statusFind,
         staffID: plantId,
