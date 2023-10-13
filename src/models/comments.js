@@ -9,7 +9,7 @@ const CommentSchema = new mongoose.Schema(
     userId: {
       type: String,
       require: true,
-      enum: ["Client", "Admin", "Strff"],
+      enum: ["Client", "Admin", "Staff"],
     },
     resolvedId: {
       type: mongoose.Schema.Types.ObjectId,
