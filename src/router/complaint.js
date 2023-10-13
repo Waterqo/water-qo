@@ -592,7 +592,7 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
   try {
     const plantId = req.params.Id;
     const statusFind = req.params.status;
-
+    console.log(plantId);
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
@@ -606,11 +606,11 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
     if (statusFind != "All") {
       const total = await Complaint.countDocuments({
         status: statusFind,
-        staffID: plantId,
+        staff: plantId,
       });
       const statusComplaint = await Complaint.find({
         status: statusFind,
-        staffID: plantId,
+        staff: plantId,
       })
         .populate("waterPlant")
         .skip(skip)
@@ -629,12 +629,11 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
       });
     }
 
-    const plantComplaint = await Complaint.find({ staffID: plantId })
+    const plantComplaint = await Complaint.find({ staff: plantId })
       .populate("waterPlant")
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
-
     if (!plantComplaint) {
       return res
         .status(400)
