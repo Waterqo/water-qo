@@ -693,12 +693,7 @@ router.get("/assignStaff/:Id", async (req, res) => {
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
-    if (finding.length <= 0) {
-      return res.status(400).send({
-        success: false,
-        message: "No complaint found ",
-      });
-    }
+
     const totalPages = Math.ceil(total / limit);
     res
       .status(200)
