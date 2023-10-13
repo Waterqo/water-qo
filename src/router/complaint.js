@@ -112,7 +112,7 @@ router.post(
           complaint,
           status: "Pending",
           pics: attachArtwork.map((x) => x.url),
-          staffID: userId,
+          staff: userId,
           role: "Staff",
         });
       }
@@ -596,7 +596,7 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await Complaint.countDocuments({ staffID: plantId });
+    const total = await Complaint.countDocuments({ staff: plantId });
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
