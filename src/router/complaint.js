@@ -8,6 +8,7 @@ const upload = require("../helper/multer");
 const Complaint = require("../models/complaintSchme");
 const ComplaintResolved = require("../models/complaintResolvedSchme");
 const { ComplaintJoiSchema } = require("../helper/joi/joiSchema");
+const Comment = require("../models/comments");
 // var FCM = require("fcm-node");
 // var fcm = new FCM(serverKey);
 // var serverKey = process.env.SERVERKEY;
@@ -298,9 +299,9 @@ router.post(
 router.get("/complaint/resolve/one/:id", async (req, res) => {
   try {
     const resolvedId = req.params.id;
-    const allComplain = await ComplaintResolved.findById(resolvedId).populate(
-      "complaintId"
-    );
+    const allComplain = await ComplaintResolved.findById(resolvedId)
+      .populate({ path: "comment", select: "comment userId" })
+      .populate("complaintId");
 
     if (!allComplain) {
       return res
@@ -656,14 +657,21 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
   }
 });
 
-router.put("/comment/:Id", async (req, res) => {
+router.post("/comment/:Id", async (req, res) => {
   try {
     const resolvedId = req.params.Id;
     const comment = req.body.comment;
-    console.log(comment);
+    const userId = req.body.userId;
+    const newcomment = new Comment({
+      userId,
+      comment,
+      resolvedId,
+    });
+    await newcomment.save();
+    console.log();
     const complaint = await ComplaintResolved.findById(resolvedId);
-    complaint.comment.push(comment);
-    console.log(complaint.comment);
+    complaint.comment.push(newcomment._id);
+    await complaint.save();
     return res.status(200).send({ success: true, data: complaint });
   } catch (error) {
     console.error(error);

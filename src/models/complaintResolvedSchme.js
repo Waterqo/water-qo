@@ -14,18 +14,12 @@ const ComplaintResolvedSchme = new mongoose.Schema(
       type: Array,
       require: true,
     },
-    comment: {
-      client: [
-        {
-          type: String,
-        },
-      ],
-      admin: [
-        {
-          type: String,
-        },
-      ],
-    },
+    comment: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
   },
   { timestamps: true }
 );
