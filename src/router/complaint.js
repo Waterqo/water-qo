@@ -244,11 +244,11 @@ router.post(
     const files = req.files;
     const attachArtwork = [];
     try {
-      if (!files || files?.length < 1)
-        return res.status(401).json({
-          success: false,
-          message: "You have to upload at least one image to the listing",
-        });
+      // if (!files || files?.length < 1)
+      //   return res.status(401).json({
+      //     success: false,
+      //     message: "You have to upload at least one image to the listing",
+      //   });
       for (const file of files) {
         const { path } = file;
         try {
