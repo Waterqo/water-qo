@@ -31,7 +31,7 @@ router.get("/all/:Id", async (req, res) => {
     const user = await Client.findById(UserId);
     const plantId = user.waterPlant;
     const total = plantId.length;
-    let allPlant = await Plant.findById(plantId)
+    let allPlant = await Plant.find({ _id: plantId })
       .select("short_id address")
       .skip(skip)
       .limit(limit)
