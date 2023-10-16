@@ -10,6 +10,7 @@ const ComplaintResolved = require("../models/complaintResolvedSchme");
 const { ComplaintJoiSchema } = require("../helper/joi/joiSchema");
 const Comment = require("../models/comments");
 const Inventory = require("../models/inventery");
+const { Router } = require("express");
 // var FCM = require("fcm-node");
 // var fcm = new FCM(serverKey);
 // var serverKey = process.env.SERVERKEY;
@@ -769,8 +770,25 @@ router.get("/search/inv/:searchfield", async (req, res) => {
       .status(200)
       .send({ success: true, data: plant, limit, total, page, totalPages });
   } catch (error) {
+    console.error(error);
     res.status(500).send({ message: "Internal server error" });
   }
 });
 
+router.post("/updateinv/:Id", async (req, res) => {
+  try {
+    const invId = req.params.Id;
+    const { Stock, Code, MaterialInventory } = req.body;
+    const inv = await Inventory.findById(invId);
+    inv.Stock = Stock || inv.Stock;
+    inv.Code = Code || inv.Code;
+    inv.MaterialInventory = MaterialInventory || inv.MaterialInventory;
+
+    inv.save();
+    res.status(200).send({ success: true, data: inv });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
 module.exports = router;
