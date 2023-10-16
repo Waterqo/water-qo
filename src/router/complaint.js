@@ -230,6 +230,35 @@ router.get("/inventry", async (req, res) => {
   }
 });
 
+router.get("/search/inv/:searchfield", async (req, res) => {
+  try {
+    const searchfield = req.params.searchfield;
+    let sortBY = { createdAt: -1 };
+
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Inventory.countDocuments({
+      MaterialInventory: { $regex: searchfield, $options: "i" },
+    });
+
+    const plant = await Inventory.find({
+      MaterialInventory: { $regex: searchfield, $options: "i" },
+    })
+      .sort(sortBY)
+      .skip(skip)
+      .limit(limit);
+
+    const totalPages = Math.ceil(total / limit);
+
+    res
+      .status(200)
+      .send({ success: true, data: plant, limit, total, page, totalPages });
+  } catch (error) {
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
 router.get("/complaints/:Id", async (req, res) => {
   try {
     const Id = req.params.Id;
