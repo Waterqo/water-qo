@@ -784,11 +784,28 @@ router.post("/updateinv/:Id", async (req, res) => {
     inv.Code = Code || inv.Code;
     inv.MaterialInventory = MaterialInventory || inv.MaterialInventory;
 
-    inv.save();
+    await inv.save();
     res.status(200).send({ success: true, data: inv });
   } catch (error) {
     console.error(error);
     res.status(500).send({ message: "Internal server error" });
   }
 });
+
+router.post("/createInv", async (req, res) => {
+  try {
+    const { Stock, Code, MaterialInventory } = req.body;
+    const newInv = new Inventory({
+      Stock,
+      Code,
+      MaterialInventory,
+    });
+    await newInv.save();
+    res.status(200).send({ success: true, data: newInv });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal Server Error!");
+  }
+});
+
 module.exports = router;
