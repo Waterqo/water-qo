@@ -808,4 +808,34 @@ router.post("/createInv", async (req, res) => {
   }
 });
 
+router.get("/Oneinv/:Id", async (req, res) => {
+  try {
+    const Id = req.params.Id;
+    const inv = await Inventory.findById(Id);
+    if (inv == null) {
+      return res.status(400).send({ success: false, data: [] });
+    }
+    return res.status(200).send({ success: true, data: inv });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server Eroor!");
+  }
+});
+
+router.delete("/OneinvDelete/:Id", async (req, res) => {
+  try {
+    const Id = req.params.Id;
+    const inv = await Inventory.findByIdAndDelete(Id);
+    if (inv == null) {
+      return res.status(400).send({ success: false, data: [] });
+    }
+    return res
+      .status(200)
+      .send({ success: true, message: "product deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server Eroor!");
+  }
+});
+
 module.exports = router;
