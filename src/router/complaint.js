@@ -9,6 +9,7 @@ const Complaint = require("../models/complaintSchme");
 const ComplaintResolved = require("../models/complaintResolvedSchme");
 const { ComplaintJoiSchema } = require("../helper/joi/joiSchema");
 const Comment = require("../models/comments");
+const Inventory = require("../models/inventery");
 // var FCM = require("fcm-node");
 // var fcm = new FCM(serverKey);
 // var serverKey = process.env.SERVERKEY;
@@ -172,6 +173,45 @@ router.get("/complaints", async (req, res) => {
       return res
         .status(400)
         .send({ success: false, message: "No Complaint found! mubarak ho" });
+    }
+
+    const totalPages = Math.ceil(total / limit);
+
+    res.status(200).send({
+      success: true,
+      data: allComplain,
+      page,
+      totalPages,
+      limit,
+      total,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
+router.get("/inventry", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Inventory.countDocuments();
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+
+    const allComplain = await Inventory.find()
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+
+    if (!allComplain) {
+      return res
+        .status(400)
+        .send({ success: false, message: "No Inventory found! mubarak ho" });
     }
 
     const totalPages = Math.ceil(total / limit);
