@@ -11,6 +11,8 @@ const { ComplaintJoiSchema } = require("../helper/joi/joiSchema");
 const Comment = require("../models/comments");
 const Inventory = require("../models/inventery");
 const { Router } = require("express");
+const { Types } = require("mongoose");
+
 // var FCM = require("fcm-node");
 // var fcm = new FCM(serverKey);
 // var serverKey = process.env.SERVERKEY;
@@ -268,9 +270,25 @@ router.post(
         }
       }
       const complaintId = req.params.Id;
-      const text = req.body.text;
+      const { text, recommendation } = req.body;
+      const inventoryItem = req.body.inventoryItem;
+      console.log(inventoryItem);
+      // // let inventoryArray = [];
+      // for (let i = 0; i < inventory.length; i++) {
+      //   const element = inventory[i];
+      //   console.log(element);
+      // // }
+      // const all = await Inventory.find();
+      // // console.log("ALL", all);
+      // const newArr = await inventory?.filter((x) =>
+      //   all.some((y) => y._id == x)
+      // );
+      // console.log(newArr);
+
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
+        inventoryItem,
+        recommendation,
         text,
         resolved: true,
         pics: attachArtwork.map((x) => x.url),
@@ -280,13 +298,9 @@ router.post(
         resolvedComplaint,
         status: "Resolved",
       };
-      const complaint = await Complaint.findByIdAndUpdate(
-        complaintId,
-        updated,
-        { new: true }
-      );
-
-      await complaintReply.save();
+      await Complaint.findByIdAndUpdate(complaintId, updated, { new: true });
+      //
+      // await complaintReply.save();
       res.status(200).send({
         message: "complaint is successsfully resolved",
         complaintReply,

@@ -7,9 +7,15 @@ const ComplaintResolvedSchme = new mongoose.Schema(
       require: true,
       ref: "Complaint",
     },
+    recommendation: {
+      type: String,
+      enum: ["Repair", "Replace", "Others"],
+      require: true,
+    },
     text: {
       type: String,
     },
+    inventoryItem: [{ type: String }],
     pics: {
       type: Array,
       require: true,
