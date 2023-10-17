@@ -12,7 +12,31 @@ const DailyVisitSchema = new mongoose.Schema(
       ref: "Plant",
       require: true,
     },
-    pics: {
+    Complain_Cell_Sticker: {
+      type: Array,
+      require: true,
+    },
+    Internal_Panel: {
+      type: Array,
+      require: true,
+    },
+    MPVs_Meters: {
+      type: Array,
+      require: true,
+    },
+    Water_Meter: {
+      type: Array,
+      require: true,
+    },
+    Dispensing_Area_Cleaning: {
+      type: Array,
+      require: true,
+    },
+    Internal_Plant_Cleaning: {
+      type: Array,
+      require: true,
+    },
+    Log_Book: {
       type: Array,
       require: true,
     },

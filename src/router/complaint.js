@@ -125,9 +125,9 @@ router.post(
       let tokendeviceArray = [];
       for (let index = 0; index < admin.length; index++) {
         const element = admin[index];
-        element.devicetoken == undefined
+        element.deviceToken == undefined
           ? " "
-          : tokendeviceArray.push(element.devicetoken);
+          : tokendeviceArray.push(element.deviceToken);
       }
       const newdeviceToken = tokendeviceArray.filter(
         (item, index) => tokendeviceArray.indexOf(item) === index
@@ -225,14 +225,23 @@ router.put("/assignstaff/:Id", async (req, res) => {
     );
     console.log(assignStaff);
     const staff = await Staff.findById(staffId);
+    if (staff) {
+      const name = staff.name;
+      const deviceToken = staff.deviceToken;
+      const ID = complaintId;
+      const title = "A new complaint is assign to you";
+      const body = `Hello ${name}, A new Complaint is asssign to you`;
 
-    const name = staff.name;
-    const deviceToken = staff.deviceToken;
-    const ID = complaintId;
-    const title = "A new complaint is assign to you";
-    const body = `Hello ${name}, A new Complaint is asssign to you`;
+      sendNotification(title, body, deviceToken, ID);
+    }
 
-    sendNotification(title, body, deviceToken, ID);
+    // const name = staff.name;
+    // const deviceToken = staff.deviceToken;
+    // const ID = complaintId;
+    // const title = "A new complaint is assign to you";
+    // const body = `Hello ${name}, A new Complaint is asssign to you`;
+
+    // sendNotification(title, body, deviceToken, ID);
 
     res.status(200).send({ message: "Staff added successfully!", assignStaff });
   } catch (error) {
