@@ -223,7 +223,6 @@ router.put("/assignstaff/:Id", async (req, res) => {
       updated,
       { new: true }
     );
-    console.log(assignStaff);
     const staff = await Staff.findById(staffId);
     if (staff) {
       const name = staff.name;
@@ -235,13 +234,27 @@ router.put("/assignstaff/:Id", async (req, res) => {
       sendNotification(title, body, deviceToken, ID);
     }
 
-    // const name = staff.name;
-    // const deviceToken = staff.deviceToken;
-    // const ID = complaintId;
-    // const title = "A new complaint is assign to you";
-    // const body = `Hello ${name}, A new Complaint is asssign to you`;
+    if (assignStaff.role == "Staff") {
+      const user = await Staff.findById(assignStaff.staff.toString());
 
-    // sendNotification(title, body, deviceToken, ID);
+      const name = user.name;
+      const deviceToken = user.deviceToken;
+      const ID = complaintId;
+      const title = "Admin just assign the Operator in your Complaint";
+      const body = `Hello ${name}, Admin just assign the Operator in your Complaint`;
+
+      sendNotification(title, body, deviceToken, ID);
+    } else if (assignStaff.role == "Client") {
+      const user = await Client.findById(assignStaff.clientID.toString());
+
+      const name = user.name;
+      const deviceToken = user.deviceToken;
+      const ID = complaintId;
+      const title = "Admin just assign the Operator in your Complaint";
+      const body = `Hello ${name}, Admin just assign the Operator in your Complaint`;
+
+      sendNotification(title, body, deviceToken, ID);
+    }
 
     res.status(200).send({ message: "Staff added successfully!", assignStaff });
   } catch (error) {
@@ -289,7 +302,6 @@ router.post(
         await inventery.save();
         inventoryArray.push(inventery.MaterialInventory);
       }
-      console.log(inventoryArray);
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
         inventoryItem: inventoryArray,
@@ -303,9 +315,57 @@ router.post(
         resolvedComplaint,
         status: "Resolved",
       };
-      await Complaint.findByIdAndUpdate(complaintId, updated, { new: true });
+      const complaint = await Complaint.findByIdAndUpdate(
+        complaintId,
+        updated,
+        { new: true }
+      );
 
       await complaintReply.save();
+
+      const admin = await Admin.find();
+      let tokendeviceArray = [];
+      for (let index = 0; index < admin.length; index++) {
+        const element = admin[index];
+        element.deviceToken == undefined
+          ? " "
+          : tokendeviceArray.push(element.deviceToken);
+      }
+      const newdeviceToken = tokendeviceArray.filter(
+        (item, index) => tokendeviceArray.indexOf(item) === index
+      );
+      const ID = complaintReply._id;
+      const title = "The past complainted is solved";
+      const body = `Hello Admin, your past complainted is solved!`;
+      const deviceToken = newdeviceToken;
+
+      deviceToken.length > 0 &&
+        deviceToken.forEach((eachToken) => {
+          sendNotification(title, body, eachToken, ID);
+        });
+
+      if (complaint.role == "Staff") {
+        const user = await Staff.findById(complaint.staff.toString());
+
+        const name = user.name;
+        const deviceToken = user.deviceToken;
+        const ID = complaintId;
+        const title = "Your Complainted just Solved";
+        const body = `Hello ${name}, Your Complainted just solved`;
+
+        sendNotification(title, body, deviceToken, ID);
+      } else if (complaint.role == "Client") {
+        const user = await Client.findById(complaint.clientID.toString());
+
+        const name = user.name;
+        const deviceToken = user.deviceToken;
+        const ID = complaintId;
+        const title = "Your Complainted just Solved";
+        const body = `Hello ${name}, Your Complainted just Solved`;
+
+        sendNotification(title, body, deviceToken, ID);
+      }
+
       res.status(200).send({
         message: "complaint is successsfully resolved",
         complaintReply,

@@ -91,7 +91,6 @@ router.post(
               type: fileArray,
             });
             fs.unlinkSync(files[fileArray][file].path);
-            console.log();
           } catch (err) {
             if (attachArtwork[fileArray]?.length) {
               const imgs = attachArtwork[fileArray].map((obj) => obj.public_id);
@@ -101,7 +100,6 @@ router.post(
           }
         }
       }
-      console.log(attachArtwork);
 
       const visitDaily = new DailyVisit({
         userId: req.body.userId,
