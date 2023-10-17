@@ -13,30 +13,30 @@ const Inventory = require("../models/inventery");
 const { Router } = require("express");
 const { Types } = require("mongoose");
 
-// var FCM = require("fcm-node");
-// var fcm = new FCM(serverKey);
-// var serverKey = process.env.SERVERKEY;
+var FCM = require("fcm-node");
+var serverKey = process.env.SERVERKEY;
+var fcm = new FCM(serverKey);
 
-// const sendNotification = async (title, body, deviceToken, ID) => {
-//   const message = {
-//     notification: {
-//       title: title,
-//       body: body,
-//     },
-//     to: deviceToken,
-//     data: {
-//       my_key: ID,
-//     },
-//   };
+const sendNotification = async (title, body, deviceToken, ID) => {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    to: deviceToken,
+    data: {
+      my_key: ID,
+    },
+  };
 
-//   fcm.send(message, function (err, response) {
-//     if (err) {
-//       console.log("Something has gone wrong!");
-//     } else {
-//       console.log("Successfully sent with response: ", response);
-//     }
-//   });
-// };
+  fcm.send(message, function (err, response) {
+    if (err) {
+      console.log("Something has gone wrong!");
+    } else {
+      console.log("Successfully sent with response: ", response);
+    }
+  });
+};
 
 router.post(
   "/create/complaint/:Id",
@@ -271,23 +271,19 @@ router.post(
       }
       const complaintId = req.params.Id;
       const { text, recommendation } = req.body;
-      const inventoryItem = req.body.inventoryItem;
-      console.log(inventoryItem);
-      // // let inventoryArray = [];
-      // for (let i = 0; i < inventory.length; i++) {
-      //   const element = inventory[i];
-      //   console.log(element);
-      // // }
-      // const all = await Inventory.find();
-      // // console.log("ALL", all);
-      // const newArr = await inventory?.filter((x) =>
-      //   all.some((y) => y._id == x)
-      // );
-      // console.log(newArr);
-
+      const inventoryItems = JSON.parse(req.body.inventoryItem);
+      let inventoryArray = [];
+      for (let i = 0; i < inventoryItems.length; i++) {
+        const element = inventoryItems[i];
+        const inventery = await Inventory.findById(element);
+        inventery.Stock = inventery.Stock - 1;
+        await inventery.save();
+        inventoryArray.push(inventery.MaterialInventory);
+      }
+      console.log(inventoryArray);
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
-        inventoryItem,
+        inventoryItem: inventoryArray,
         recommendation,
         text,
         resolved: true,
