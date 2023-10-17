@@ -223,7 +223,7 @@ router.put("/assignstaff/:Id", async (req, res) => {
       updated,
       { new: true }
     );
-
+    console.log(assignStaff);
     const staff = await Staff.findById(staffId);
 
     const name = staff.name;
@@ -232,7 +232,7 @@ router.put("/assignstaff/:Id", async (req, res) => {
     const title = "A new complaint is assign to you";
     const body = `Hello ${name}, A new Complaint is asssign to you`;
 
-    // sendNotification(title, body, deviceToken, ID);
+    sendNotification(title, body, deviceToken, ID);
 
     res.status(200).send({ message: "Staff added successfully!", assignStaff });
   } catch (error) {
@@ -295,8 +295,8 @@ router.post(
         status: "Resolved",
       };
       await Complaint.findByIdAndUpdate(complaintId, updated, { new: true });
-      //
-      // await complaintReply.save();
+
+      await complaintReply.save();
       res.status(200).send({
         message: "complaint is successsfully resolved",
         complaintReply,
