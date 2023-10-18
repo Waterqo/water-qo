@@ -11,6 +11,12 @@ const InventorySchema = new mongoose.Schema({
   },
   Stock: {
     type: Number,
+    require: true,
+    default: 0,
+  },
+  Items_Quantity_Full: {
+    type: Number,
+    require: true,
   },
 });
 

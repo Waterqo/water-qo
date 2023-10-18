@@ -857,11 +857,12 @@ router.get("/search/inv/:searchfield", async (req, res) => {
 router.post("/updateinv/:Id", async (req, res) => {
   try {
     const invId = req.params.Id;
-    const { Stock, Code, MaterialInventory } = req.body;
+    const { Stock, Code, MaterialInventory, Items_Quantity_Full } = req.body;
     const inv = await Inventory.findById(invId);
     inv.Stock = Stock || inv.Stock;
     inv.Code = Code || inv.Code;
     inv.MaterialInventory = MaterialInventory || inv.MaterialInventory;
+    inv.Items_Quantity_Full = MaterialInventory || inv.Items_Quantity_Full;
 
     await inv.save();
     res.status(200).send({ success: true, data: inv });
@@ -873,11 +874,12 @@ router.post("/updateinv/:Id", async (req, res) => {
 
 router.post("/createInv", async (req, res) => {
   try {
-    const { Stock, Code, MaterialInventory } = req.body;
+    const { Stock, Code, MaterialInventory, Items_Quantity_Full } = req.body;
     const newInv = new Inventory({
       Stock,
       Code,
       MaterialInventory,
+      Items_Quantity_Full,
     });
     await newInv.save();
     res.status(200).send({ success: true, data: newInv });
