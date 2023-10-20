@@ -18,7 +18,6 @@ const ComplaintResolvedSchme = new mongoose.Schema(
     inventoryItem: [
       {
         type: String,
-        require: true,
       },
     ],
     pics: {
