@@ -293,10 +293,12 @@ router.post(
       }
       const complaintId = req.params.Id;
       const { text, recommendation } = req.body;
-      const inventoryItems = req.body.inventoryItem;
+      const inventoryItems = JSON.parse(req.body.inventoryItem);
+      console.log(inventoryItems);
       let inventoryArray = [];
       for (let i = 0; i < inventoryItems.length; i++) {
         const element = inventoryItems[i];
+        console.log(element);
         const inventery = await Inventory.findById(element);
         inventery.Stock = inventery.Stock - 1;
         await inventery.save();
