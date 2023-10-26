@@ -300,6 +300,12 @@ router.post(
         const element = inventoryItems[i];
         console.log(element);
         const inventery = await Inventory.findById(element);
+        if (inventery.Stock == 0) {
+          return res.status(400).send({
+            success: false,
+            message: `The Item you choose "${inventery.MaterialInventory}" is already 0`,
+          });
+        }
         inventery.Stock = inventery.Stock - 1;
         await inventery.save();
         inventoryArray.push(inventery.MaterialInventory);
