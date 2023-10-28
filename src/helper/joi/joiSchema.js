@@ -16,6 +16,22 @@ const AdminJoiSchema = (req, res, next) => {
   }
 };
 
+const StaffSchema = Joi.object({
+  name: Joi.string().required(),
+  contact_number: Joi.number().required(),
+  username: Joi.string().required(),
+  password: Joi.string().required(),
+}).unknown();
+
+const StaffJoiSchema = (req, res, next) => {
+  const { error } = StaffSchema.validate(req.body, { abortEarly: false });
+  if (error) {
+    return res.status(400).json({ error });
+  } else {
+    next();
+  }
+};
+
 const ClientSchme = Joi.object({
   name: Joi.string().required(),
   contact_number: Joi.string().required(),
@@ -85,4 +101,9 @@ const ComplaintJoiSchema = (req, res, next) => {
   }
 };
 
-module.exports = { AdminJoiSchema, ClientJoiSchme, ComplaintJoiSchema };
+module.exports = {
+  AdminJoiSchema,
+  StaffJoiSchema,
+  ClientJoiSchme,
+  ComplaintJoiSchema,
+};

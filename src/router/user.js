@@ -10,7 +10,11 @@ const JWT = require("jsonwebtoken");
 const Admin = require("../models/admin");
 const Staff = require("../models/staff");
 const Client = require("../models/clientSchema");
-const { AdminJoiSchema, ClientJoiSchme } = require("../helper/joi/joiSchema");
+const {
+  AdminJoiSchema,
+  StaffJoiSchema,
+  ClientJoiSchme,
+} = require("../helper/joi/joiSchema");
 
 router.post("/register/client", ClientJoiSchme, async (req, res) => {
   try {
@@ -119,31 +123,19 @@ router.post("/register/admin", AdminJoiSchema, async (req, res) => {
   }
 });
 
-router.post("/register/Staff", AdminJoiSchema, async (req, res) => {
+router.post("/register/Staff", StaffJoiSchema, async (req, res) => {
   try {
-    const { name, contact_number, email, password } = req.body;
-    if (!name || !contact_number || !email || !password) {
+    const { name, contact_number, username, password } = req.body;
+    if (!name || !contact_number || !username || !password) {
       return res.status(400).send({
         success: false,
         message: "Kindly provide complete information.",
       });
     }
 
-    const existingUser = await Client.findOne({ email: req.body.email });
-    if (existingUser) {
-      return res.status(400).send({
-        success: false,
-        message: "The email is already registered Client!",
-      });
-    }
-    const existingUserAdmin = await Admin.findOne({ email: req.body.email });
-    if (existingUserAdmin) {
-      return res.status(400).send({
-        success: false,
-        message: "The email is already registered as Admin!",
-      });
-    }
-    const existingUserStaff = await Staff.findOne({ email: req.body.email });
+    const existingUserStaff = await Staff.findOne({
+      username: req.body.username,
+    });
     if (existingUserStaff) {
       return res.status(400).send({
         success: false,
@@ -158,7 +150,7 @@ router.post("/register/Staff", AdminJoiSchema, async (req, res) => {
     const user = new Staff({
       name,
       contact_number,
-      email,
+      username,
       password: hashedPassword,
       role: "Staff",
     });
@@ -233,7 +225,7 @@ router.post("/login", async (req, res) => {
         data: anotherUser,
       });
     }
-    const lastuser = await Staff.findOne({ email: req.body.email });
+    const lastuser = await Staff.findOne({ username: req.body.email });
     if (lastuser) {
       const validPassword = await bcrypt.compare(
         req.body.password,
