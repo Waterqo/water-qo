@@ -150,7 +150,7 @@ router.post("/register/Staff", StaffJoiSchema, async (req, res) => {
     const user = new Staff({
       name,
       contact_number,
-      username,
+      username: username.toLowerCase(),
       password: hashedPassword,
       role: "Staff",
     });
