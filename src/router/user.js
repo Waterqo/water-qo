@@ -167,6 +167,7 @@ router.post("/register/Staff", StaffJoiSchema, async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
     if (!email) {
       return res
         .status(400)
@@ -225,7 +226,9 @@ router.post("/login", async (req, res) => {
         data: anotherUser,
       });
     }
-    const lastuser = await Staff.findOne({ username: req.body.email });
+    const lastuser = await Staff.findOne({
+      username: req.body.email.toLowerCase(),
+    });
     if (lastuser) {
       const validPassword = await bcrypt.compare(
         req.body.password,
