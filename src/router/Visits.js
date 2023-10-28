@@ -1,3 +1,4 @@
+const geo = require("geo");
 const DailyVisit = require("../models/dailyVisiti");
 const router = require("express").Router();
 const cloudinary = require("../helper/cloudinary");
@@ -119,7 +120,38 @@ router.post(
         Log_Book: attachArtwork.Log_Book.map((x) => x.url),
       });
       const pumb = await Plant.findById(req.body.location);
-      console.log(pumb);
+
+      function calculateDistance(lat, lon, latitude, longitude) {
+        const R = 6371; // Radius of the Earth in km
+        const dLat = deg2rad(latitude - lat);
+        const dLon = deg2rad(longitude - lon);
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(deg2rad(lat)) *
+            Math.cos(deg2rad(latitude)) *
+            Math.sin(dLon / 2) *
+            Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c; // Distance in km
+        return distance;
+      }
+      function deg2rad(deg) {
+        return deg * (Math.PI / 180);
+      }
+      const plantLat = pumb.latitude;
+      const plantLon = pumb.longitude;
+
+      const userLat = req.body.latitude;
+      const userLon = req.body.longitude;
+      const distance = calculateDistance(plantLat, plantLon, userLat, userLon);
+
+      if (distance > 5) {
+        return res.status(400).send({
+          success: false,
+          message: "You are not in a 5-KM radius form the Plant location",
+        });
+      }
+
       await visitDaily.save();
       res.status(200).send({
         message: "complaint is successsfully resolved",
