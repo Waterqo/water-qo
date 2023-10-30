@@ -83,6 +83,11 @@ const ComplaintSchme = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
     },
+    complaintType: {
+      type: String,
+      enum: ["Normal", "Urgent", "VeryUrgent"],
+      default: "Normal",
+    },
     role: {
       type: String,
       enum: ["Client", "Admin", "Staff"],

@@ -67,8 +67,13 @@ router.post(
         }
       }
       const userId = req.params.Id;
-      const { nameOfComplainter, waterPlant, complaintCategory, complaint } =
-        req.body;
+      const {
+        nameOfComplainter,
+        waterPlant,
+        complaintType,
+        complaintCategory,
+        complaint,
+      } = req.body;
       if (
         !nameOfComplainter ||
         !waterPlant ||
@@ -87,6 +92,7 @@ router.post(
           waterPlant,
           complaintCategory,
           complaint,
+          complaintType,
           status: "Pending",
           pics: attachArtwork.map((x) => x.url),
           clientID: userId,
@@ -100,6 +106,7 @@ router.post(
           waterPlant,
           complaintCategory,
           complaint,
+          complaintType: "Normal",
           status: "Pending",
           pics: attachArtwork.map((x) => x.url),
           adminID: userId,
@@ -112,6 +119,7 @@ router.post(
           nameOfComplainter,
           waterPlant,
           complaintCategory,
+          complaintType: "Normal",
           complaint,
           status: "Pending",
           pics: attachArtwork.map((x) => x.url),
