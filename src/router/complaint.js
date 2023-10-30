@@ -515,6 +515,58 @@ router.get("/complaintStatus/:status", async (req, res) => {
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
+    if (statusFind === "Urgent") {
+      const total = await Complaint.countDocuments({ complaintType: "Urgent" });
+
+      const allComplain = await Complaint.find({ complaintType: "Urgent" })
+        .populate("waterPlant")
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+
+      if (!allComplain) {
+        return res
+          .status(400)
+          .send({ success: false, message: "No Complaint found! mubarak ho" });
+      }
+
+      const totalPages = Math.ceil(total / limit);
+
+      return res.status(200).send({
+        success: true,
+        data: allComplain,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
+    } else if (statusFind === "VeryUrgent") {
+      const total = await Complaint.countDocuments({
+        complaintType: "VeryUrgent",
+      });
+      const allComplain = await Complaint.find({ complaintType: "VeryUrgent" })
+        .populate("waterPlant")
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+
+      if (!allComplain) {
+        return res
+          .status(400)
+          .send({ success: false, message: "No Complaint found! mubarak ho" });
+      }
+
+      const totalPages = Math.ceil(total / limit);
+
+      return res.status(200).send({
+        success: true,
+        data: allComplain,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
+    }
     if (statusFind === "All") {
       const total = await Complaint.countDocuments();
       const allComplaint = await Complaint.find()
