@@ -10,8 +10,7 @@ const ComplaintResolved = require("../models/complaintResolvedSchme");
 const { ComplaintJoiSchema } = require("../helper/joi/joiSchema");
 const Comment = require("../models/comments");
 const Inventory = require("../models/inventery");
-const { Router } = require("express");
-const { Types } = require("mongoose");
+const { verifyInvManager } = require("../middlewares/verify");
 
 var FCM = require("fcm-node");
 var serverKey = process.env.SERVERKEY;
@@ -862,7 +861,7 @@ router.get("/search/inv/:searchfield", async (req, res) => {
   }
 });
 
-router.post("/updateinv/:Id", async (req, res) => {
+router.post("/updateinv/:Id", verifyInvManager, async (req, res) => {
   try {
     const invId = req.params.Id;
     const { Stock, Code, MaterialInventory, Items_Quantity_Full } = req.body;
@@ -880,7 +879,7 @@ router.post("/updateinv/:Id", async (req, res) => {
   }
 });
 
-router.post("/createInv", async (req, res) => {
+router.post("/createInv", verifyInvManager, async (req, res) => {
   try {
     const { Stock, Code, MaterialInventory, Items_Quantity_Full } = req.body;
     const newInv = new Inventory({
@@ -911,7 +910,7 @@ router.get("/Oneinv/:Id", async (req, res) => {
   }
 });
 
-router.delete("/OneinvDelete/:Id", async (req, res) => {
+router.delete("/OneinvDelete/:Id", verifyInvManager, async (req, res) => {
   try {
     const Id = req.params.Id;
     const inv = await Inventory.findByIdAndDelete(Id);
