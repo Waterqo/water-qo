@@ -169,7 +169,6 @@ router.post(
 router.get("/all/visits/:Id", async (req, res) => {
   try {
     const staffID = req.params.Id;
-    console.log(staffID);
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
@@ -179,9 +178,12 @@ router.get("/all/visits/:Id", async (req, res) => {
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
-    const startDate = new Date(req.query.startDate);
-    const endDate = new Date(req.query.endDate);
-    if (startDate && endDate) {
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    if (startDate || endDate) {
+      if (!endDate) endDate = Date.now();
+      new Date(startDate);
+      new Date(endDate);
       const total = await DailyVisit.countDocuments({
         createdAt: { $gte: startDate, $lte: endDate },
         userId: staffID,
@@ -209,6 +211,7 @@ router.get("/all/visits/:Id", async (req, res) => {
         total,
       });
     }
+
     const allVisits = await DailyVisit.find({ userId: staffID })
       .populate({ path: "location", select: "address latitude longitude" })
       .populate({ path: "userId", select: "name contact_number" })
@@ -243,9 +246,15 @@ router.get("/all/visits", async (req, res) => {
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
-    const startDate = new Date(req.query.startDate);
-    const endDate = new Date(req.query.endDate);
-    if (startDate && endDate) {
+    const startDate = req.query.startDate;
+    let endDate = req.query.endDate;
+    if (startDate || endDate) {
+      if (!endDate) {
+        endDate = Date.now();
+      }
+
+      new Date(startDate);
+      new Date(endDate);
       const total = await DailyVisit.countDocuments({
         createdAt: { $gte: startDate, $lte: endDate },
       });
