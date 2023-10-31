@@ -13,6 +13,7 @@ const Inventory = require("../models/inventery");
 const { verifyInvManager } = require("../middlewares/verify");
 
 var FCM = require("fcm-node");
+const { filter } = require("compression");
 var serverKey = process.env.SERVERKEY;
 var fcm = new FCM(serverKey);
 
@@ -504,9 +505,10 @@ router.get("/complaint/resolve", async (req, res) => {
   }
 });
 
-router.get("/complaintStatus/:status", async (req, res) => {
+router.get("/complaintStatus/:status/:type", async (req, res) => {
   try {
     const statusFind = req.params.status;
+    const typeFind = req.params.type;
     const limit = parseInt(req.query.limit, 10) || 10;
     const page = parseInt(req.query.page, 10) || 1;
     const skip = (page - 1) * limit;
@@ -515,94 +517,106 @@ router.get("/complaintStatus/:status", async (req, res) => {
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
-    if (statusFind === "Urgent") {
-      const total = await Complaint.countDocuments({ complaintType: "Urgent" });
 
-      const allComplain = await Complaint.find({ complaintType: "Urgent" })
-        .populate("waterPlant")
-        .skip(skip)
-        .limit(limit)
-        .sort(sortBY);
+    let filterObj = { status: statusFind, complaintType: typeFind };
 
-      if (!allComplain) {
-        return res
-          .status(400)
-          .send({ success: false, message: "No Complaint found! mubarak ho" });
-      }
-
-      const totalPages = Math.ceil(total / limit);
-
-      return res.status(200).send({
-        success: true,
-        data: allComplain,
-        page,
-        totalPages,
-        limit,
-        total,
-      });
-    } else if (statusFind === "VeryUrgent") {
-      const total = await Complaint.countDocuments({
-        complaintType: "VeryUrgent",
-      });
-      const allComplain = await Complaint.find({ complaintType: "VeryUrgent" })
-        .populate("waterPlant")
-        .skip(skip)
-        .limit(limit)
-        .sort(sortBY);
-
-      if (!allComplain) {
-        return res
-          .status(400)
-          .send({ success: false, message: "No Complaint found! mubarak ho" });
-      }
-
-      const totalPages = Math.ceil(total / limit);
-
-      return res.status(200).send({
-        success: true,
-        data: allComplain,
-        page,
-        totalPages,
-        limit,
-        total,
-      });
-    }
     if (statusFind === "All") {
-      const total = await Complaint.countDocuments();
-      const allComplaint = await Complaint.find()
-        .populate("waterPlant")
-        .skip(skip)
-        .limit(limit)
-        .sort(sortBY);
-
-      const totalPages = Math.ceil(total / limit);
-      return res.status(200).send({
-        success: true,
-        data: allComplaint,
-        page,
-        totalPages,
-        limit,
-        total,
-      });
-    } else if (statusFind) {
-      const total = await Complaint.countDocuments({ status: statusFind });
-      const statusComplaint = await Complaint.find({ status: statusFind })
-        .populate("waterPlant")
-        .skip(skip)
-        .limit(limit)
-        .sort(sortBY);
-
-      const totalPages = Math.ceil(total / limit);
-
-      return res.status(200).send({
-        success: true,
-        data: statusComplaint,
-        page,
-        totalPages,
-        limit,
-        total,
-      });
+      delete filterObj.status;
     }
+    if (typeFind === "All") {
+      delete filterObj.complaintType;
+    }
+
+    const total = await Complaint.countDocuments(filterObj);
+
+    const allComplain = await Complaint.find(filterObj)
+      .populate("waterPlant")
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+
+    if (!allComplain) {
+      return res
+        .status(400)
+        .send({ success: false, message: "No Complaint found! mubarak ho" });
+    }
+
+    const totalPages = Math.ceil(total / limit);
+
+    return res.status(200).send({
+      success: true,
+      data: allComplain,
+      page,
+      totalPages,
+      limit,
+      total,
+    });
+
+    // if (typeFind === "Urgent") {
+
+    // } else if (typeFind === "VeryUrgent") {
+    //   const total = await Complaint.countDocuments({
+    //     complaintType: "VeryUrgent",
+    //   });
+    //   const allComplain = await Complaint.find({ complaintType: "VeryUrgent" })
+    //     .populate("waterPlant")
+    //     .skip(skip)
+    //     .limit(limit)
+    //     .sort(sortBY);
+
+    //   if (!allComplain) {
+    //     return res
+    //       .status(400)
+    //       .send({ success: false, message: "No Complaint found! mubarak ho" });
+    //   }
+
+    //   const totalPages = Math.ceil(total / limit);
+
+    //   return res.status(200).send({
+    //     success: true,
+    //     data: allComplain,
+    //     page,
+    //     totalPages,
+    //     limit,
+    //     total,
+    //   });
+    // }
+    // if (statusFind === "All") {
+    //   const total = await Complaint.countDocuments();
+    //   const allComplaint = await Complaint.find()
+    //     .populate("waterPlant")
+    //     .skip(skip)
+    //     .limit(limit)
+    //     .sort(sortBY);
+
+    //   const totalPages = Math.ceil(total / limit);
+    //   return res.status(200).send({
+    //     success: true,
+    //     data: allComplaint,
+    //     page,
+    //     totalPages,
+    //     limit,
+    //     total,
+    //   });
+    // } else if (statusFind) {
+    //   const total = await Complaint.countDocuments({ status: statusFind, complaintType: typeFind });
+    //   const statusComplaint = await Complaint.find({ status: statusFind })
+    //     .populate("waterPlant")
+    //     .skip(skip)
+    //     .limit(limit)
+    //     .sort(sortBY);
+
+    //   const totalPages = Math.ceil(total / limit);
+
+    //   return res.status(200).send({
+    //     success: true,
+    //     data: statusComplaint,
+    //     page,
+    //     totalPages,
+    //     limit,
+    //     total,
+    //   });
+    // }
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);

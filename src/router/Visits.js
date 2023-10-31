@@ -209,22 +209,53 @@ router.get("/all/visits", async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await DailyVisit.countDocuments();
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
+    const startDate = new Date(req.query.startDate);
+    const endDate = new Date(req.query.endDate);
+    if (startDate && endDate) {
+      const total = await DailyVisit.countDocuments({
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
+      const allVisits = await DailyVisit.find({
+        createdAt: { $gte: startDate, $lte: endDate },
+      })
+        .populate({ path: "location", select: "address latitude longitude" })
+        .populate({ path: "userId", select: "name contact_number" })
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+      if (!allVisits.length > 0) {
+        return res.status(400).send({ message: "No visits found" });
+      }
 
+      const totalPages = Math.ceil(total / limit);
+
+      res.status(200).send({
+        success: true,
+        data: allVisits,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
+    }
+
+    const total = await DailyVisit.countDocuments();
     const allVisits = await DailyVisit.find()
       .populate({ path: "location", select: "address latitude longitude" })
       .populate({ path: "userId", select: "name contact_number" })
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
+
     if (!allVisits.length > 0) {
-      return res.status(400).send({ message: "no Visits found" });
+      return res.status(400).send({ message: "No visits found" });
     }
+
     const totalPages = Math.ceil(total / limit);
     res.status(200).send({
       success: true,
