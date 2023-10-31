@@ -179,7 +179,36 @@ router.get("/all/visits/:Id", async (req, res) => {
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
+    const startDate = new Date(req.query.startDate);
+    const endDate = new Date(req.query.endDate);
+    if (startDate && endDate) {
+      const total = await DailyVisit.countDocuments({
+        createdAt: { $gte: startDate, $lte: endDate },
+        userId: staffID,
+      });
+      const allVisits = await DailyVisit.find({
+        createdAt: { $gte: startDate, $lte: endDate },
+      })
+        .populate({ path: "location", select: "address latitude longitude" })
+        .populate({ path: "userId", select: "name contact_number" })
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+      if (!allVisits.length > 0) {
+        return res.status(400).send({ message: "No visits found" });
+      }
 
+      const totalPages = Math.ceil(total / limit);
+
+      return res.status(200).send({
+        success: true,
+        data: allVisits,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
+    }
     const allVisits = await DailyVisit.find({ userId: staffID })
       .populate({ path: "location", select: "address latitude longitude" })
       .populate({ path: "userId", select: "name contact_number" })
@@ -234,7 +263,7 @@ router.get("/all/visits", async (req, res) => {
 
       const totalPages = Math.ceil(total / limit);
 
-      res.status(200).send({
+      return res.status(200).send({
         success: true,
         data: allVisits,
         page,
