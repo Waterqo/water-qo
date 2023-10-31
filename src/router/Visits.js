@@ -193,6 +193,7 @@ router.get("/all/visits/:Id", async (req, res) => {
       });
       const allVisits = await DailyVisit.find({
         createdAt: { $gte: startDate, $lte: endDate },
+        userId: staffID,
       })
         .populate({ path: "location", select: "address latitude longitude" })
         .populate({ path: "userId", select: "name contact_number" })
