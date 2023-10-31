@@ -179,9 +179,12 @@ router.get("/all/visits/:Id", async (req, res) => {
       sortBY = JSON.parse(req.query.sort);
     }
     const startDate = req.query.startDate;
-    const endDate = req.query.endDate;
+    let endDate = req.query.endDate;
     if (startDate || endDate) {
-      if (!endDate) endDate = Date.now();
+      if (!endDate) {
+        endDate = Date.now();
+      }
+
       new Date(startDate);
       new Date(endDate);
       const total = await DailyVisit.countDocuments({
