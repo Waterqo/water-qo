@@ -200,9 +200,6 @@ router.get("/all/visits/:Id", async (req, res) => {
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
-      if (!allVisits.length > 0) {
-        return res.status(400).send({ message: "No visits found" });
-      }
 
       const totalPages = Math.ceil(total / limit);
 
@@ -222,9 +219,7 @@ router.get("/all/visits/:Id", async (req, res) => {
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
-    if (!allVisits.length > 0) {
-      return res.status(400).send({ message: "no Visits found" });
-    }
+
     const totalPages = Math.ceil(total / limit);
     res.status(200).send({
       success: true,
@@ -270,9 +265,6 @@ router.get("/all/visits", async (req, res) => {
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
-      if (!allVisits.length > 0) {
-        return res.status(400).send({ message: "No visits found" });
-      }
 
       const totalPages = Math.ceil(total / limit);
 
@@ -293,10 +285,6 @@ router.get("/all/visits", async (req, res) => {
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
-
-    if (!allVisits.length > 0) {
-      return res.status(400).send({ message: "No visits found" });
-    }
 
     const totalPages = Math.ceil(total / limit);
     res.status(200).send({
