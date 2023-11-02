@@ -14,6 +14,7 @@ const { verifyInvManager } = require("../middlewares/verify");
 
 var FCM = require("fcm-node");
 const { filter } = require("compression");
+const InvManager = require("../models/inventerymanage");
 var serverKey = process.env.SERVERKEY;
 var fcm = new FCM(serverKey);
 
@@ -1110,7 +1111,7 @@ router.get("/search/inv/:searchfield", async (req, res) => {
   }
 });
 
-router.put("/updateinv/:Id", async (req, res) => {
+router.put("/updateinv/:Id", verifyInvManager, async (req, res) => {
   try {
     const invId = req.params.Id;
     const { Stock, Code, MaterialInventory, Items_Quantity_Full } = req.body;
