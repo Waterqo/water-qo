@@ -1110,7 +1110,7 @@ router.get("/search/inv/:searchfield", async (req, res) => {
   }
 });
 
-router.put("/updateinv/:Id", verifyInvManager, async (req, res) => {
+router.put("/updateinv/:Id", async (req, res) => {
   try {
     const invId = req.params.Id;
     const { Stock, Code, MaterialInventory, Items_Quantity_Full } = req.body;
@@ -1128,7 +1128,7 @@ router.put("/updateinv/:Id", verifyInvManager, async (req, res) => {
   }
 });
 
-router.post("/createInv", verifyInvManager, async (req, res) => {
+router.post("/createInv", async (req, res) => {
   try {
     const { Stock, Code, MaterialInventory, Items_Quantity_Full } = req.body;
     const newInv = new Inventory({
