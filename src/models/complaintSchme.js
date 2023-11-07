@@ -93,6 +93,9 @@ const ComplaintSchme = new mongoose.Schema(
       enum: ["Client", "Admin", "Staff"],
       require: true,
     },
+    timeToStaffAssign: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

@@ -15,6 +15,8 @@ const { verifyInvManager } = require("../middlewares/verify");
 var FCM = require("fcm-node");
 const { filter } = require("compression");
 const InvManager = require("../models/inventerymanage");
+const { timeStamp } = require("console");
+const { now } = require("mongoose");
 var serverKey = process.env.SERVERKEY;
 var fcm = new FCM(serverKey);
 
@@ -278,11 +280,14 @@ router.put("/assignstaff/:Id", async (req, res) => {
       staffId,
       status: "Assigned",
     };
-    const assignStaff = await Complaint.findByIdAndUpdate(
-      complaintId,
-      updated,
-      { new: true }
-    );
+    const assignStaff = await Complaint.findById(complaintId);
+    assignStaff.staffId = staffId || assignStaff.staffId;
+    assignStaff.status = "Assigned";
+    assignStaff.timeToStaffAssign = Date.apply();
+
+    assignStaff.save();
+    console.log(assignStaff);
+
     const staff = await Staff.findById(staffId);
     if (staff) {
       const name = staff.name;
