@@ -158,7 +158,7 @@ router.get("/staff/:id", async (req, res) => {
       path: "plant",
       select: "plants_id short_id address",
     });
-    console.log(staff);
+    res.status(200).send({ success: true, data: staff });
   } catch (error) {
     res.status(500).send({ message: "Internal server error" });
   }
