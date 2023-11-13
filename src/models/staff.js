@@ -26,6 +26,12 @@ const StaffSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Complaint",
     },
+    plant: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Plant",
+      },
+    ],
     role: String,
     deviceToken: String,
   },

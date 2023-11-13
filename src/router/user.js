@@ -532,12 +532,14 @@ router.put("/update/manager/:userId", async (req, res) => {
   }
 });
 
-router.put("/update/staff", verifyStaff, async (req, res) => {
+router.put("/update/staff/:id", async (req, res) => {
   try {
-    const userId = req.user;
-    const { name, contact_number, email, password, deviceToken } = req.body;
+    const userId = req.params.id;
+    const { name, contact_number, email, password, deviceToken, plant } =
+      req.body;
     const user = await Staff.findById(userId);
 
+    user.plant = plant || user.plant;
     user.name = name || user.name;
     user.contact_number = contact_number || user.contact_number;
     user.email = email || user.email;

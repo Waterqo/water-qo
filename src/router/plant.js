@@ -1,6 +1,8 @@
 const Plant = require("../models/plants");
 const router = require("express").Router();
 const Client = require("../models/clientSchema");
+const { verifyStaff } = require("../middlewares/verify");
+const Staff = require("../models/staff");
 
 router.post("/added", async (req, res) => {
   try {
@@ -112,7 +114,7 @@ router.get("/one/:id", async (req, res) => {
   }
 });
 
-router.get("/search/:address", async (req, res, next) => {
+router.get("/search/:address", async (req, res) => {
   try {
     const searchfield = req.params.address;
     let sortBY = { createdAt: -1 };
@@ -121,22 +123,42 @@ router.get("/search/:address", async (req, res, next) => {
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
     const total = await Plant.countDocuments({
-      address: { $regex: searchfield, $options: "i" },
+      $or: [
+        { plants_id: { $regex: searchfield, $options: "i" } },
+        { short_id: { $regex: searchfield, $options: "i" } },
+      ],
     });
 
     const plant = await Plant.find({
-      address: { $regex: searchfield, $options: "i" },
+      $or: [
+        { plants_id: { $regex: searchfield, $options: "i" } },
+        { short_id: { $regex: searchfield, $options: "i" } },
+      ],
     })
       .sort(sortBY)
       .skip(skip)
       .limit(limit)
-      .select("short_id address");
+      .select("short_id plants_id address");
 
     const totalPages = Math.ceil(total / limit);
 
     res
       .status(200)
       .send({ success: true, data: plant, limit, total, totalPages });
+  } catch (error) {
+    res.status(500).send({ message: "Internal server error" });
+  }
+});
+
+router.get("/staff/:id", async (req, res) => {
+  try {
+    const staffId = req.params.id;
+
+    const staff = await Staff.findById(staffId).populate({
+      path: "plant",
+      select: "plants_id short_id address",
+    });
+    console.log(staff);
   } catch (error) {
     res.status(500).send({ message: "Internal server error" });
   }
