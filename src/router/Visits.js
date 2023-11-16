@@ -241,6 +241,76 @@ router.get("/all/visits/:Id", async (req, res) => {
   }
 });
 
+router.get("/all/visit/:plantId", async (req, res) => {
+  try {
+    const plantId = req.params.plantId;
+    console.log(plantId);
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const total = await DailyVisit.countDocuments({ location: plantId });
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+    const startDate = req.query.startDate;
+    let endDate = req.query.endDate;
+    if (startDate || endDate) {
+      if (!endDate) {
+        endDate = Date.now();
+      }
+
+      new Date(startDate);
+      new Date(endDate);
+      const total = await DailyVisit.countDocuments({ location: plantId });
+      const allVisits = await DailyVisit.find({ location: plantId })
+        .populate({
+          path: "location",
+          select: "address plants_id short_id latitude longitude",
+        })
+        .populate({ path: "userId", select: "name contact_number" })
+        .skip(skip)
+        .limit(limit)
+        .sort(sortBY);
+
+      const totalPages = Math.ceil(total / limit);
+
+      return res.status(200).send({
+        success: true,
+        data: allVisits,
+        page,
+        totalPages,
+        limit,
+        total,
+      });
+    }
+
+    const allVisits = await DailyVisit.find({ location: plantId })
+      .populate({
+        path: "location",
+        select: "address plants_id short_id latitude longitude",
+      })
+      .populate({ path: "userId", select: "name contact_number" })
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).send({
+      success: true,
+      data: allVisits,
+      page,
+      totalPages,
+      limit,
+      total,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
 router.get("/all/visits", async (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
