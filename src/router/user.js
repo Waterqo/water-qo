@@ -444,6 +444,25 @@ router.get("/find/staff/:userId", async (req, res) => {
   }
 });
 
+router.delete("/delete/staff/:Id", async (req, res) => {
+  try {
+    console.log(123);
+    const userId = req.params.Id;
+    const user = await Staff.findByIdAndDelete(userId);
+    if (!user) {
+      return res
+        .status(400)
+        .send({ seccess: false, message: "No Staff Found" });
+    }
+    res
+      .status(200)
+      .send({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
 router.put("/update/client", verifyClient, async (req, res) => {
   try {
     const userId = req.user;
