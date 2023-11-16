@@ -446,7 +446,6 @@ router.get("/find/staff/:userId", async (req, res) => {
 
 router.delete("/delete/staff/:Id", async (req, res) => {
   try {
-    console.log(123);
     const userId = req.params.Id;
     const user = await Staff.findByIdAndDelete(userId);
     if (!user) {
