@@ -166,31 +166,119 @@ router.post(
   }
 );
 
+// router.get("/all/visits/:Id", async (req, res) => {
+//   try {
+//     const staffID = req.params.Id;
+//     const page = parseInt(req.query.page, 10) || 1;
+//     const limit = parseInt(req.query.limit, 10) || 10;
+//     const skip = (page - 1) * limit;
+//     const total = await DailyVisit.countDocuments({ userId: staffID });
+
+//     let sortBY = { createdAt: -1 };
+//     if (req.query.sort) {
+//       sortBY = JSON.parse(req.query.sort);
+//     }
+//     const startDate = req.query.startDate;
+//     let endDate = req.query.endDate;
+//     if (startDate || endDate) {
+//       if (!endDate) {
+//         endDate = Date.now();
+//       }
+
+//       new Date(startDate);
+//       new Date(endDate);
+//       const total = await DailyVisit.countDocuments({
+//         createdAt: { $gte: startDate, $eq: endDate },
+//         userId: staffID,
+//       });
+//       const allVisits = await DailyVisit.find({
+//         createdAt: { $gte: startDate, $eq: endDate },
+//         userId: staffID,
+//       })
+//         .populate({
+//           path: "location",
+//           select: "address plants_id short_id latitude longitude",
+//         })
+//         .populate({ path: "userId", select: "name contact_number" })
+//         .skip(skip)
+//         .limit(limit)
+//         .sort(sortBY);
+
+//       const totalPages = Math.ceil(total / limit);
+
+//       return res.status(200).send({
+//         success: true,
+//         data: allVisits,
+//         page,
+//         totalPages,
+//         limit,
+//         total,
+//       });
+//     }
+
+//     const allVisits = await DailyVisit.find({ userId: staffID })
+//       .populate({
+//         path: "location",
+//         select: "address plants_id short_id latitude longitude",
+//       })
+//       .populate({ path: "userId", select: "name contact_number" })
+//       .skip(skip)
+//       .limit(limit)
+//       .sort(sortBY);
+
+//     const totalPages = Math.ceil(total / limit);
+//     res.status(200).send({
+//       success: true,
+//       data: allVisits,
+//       page,
+//       totalPages,
+//       limit,
+//       total,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Internal Server Error: " + error.message);
+//   }
+// });
+
 router.get("/all/visits/:Id", async (req, res) => {
   try {
     const staffID = req.params.Id;
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const skip = (page - 1) * limit;
-    const total = await DailyVisit.countDocuments({ userId: staffID });
 
     let sortBY = { createdAt: -1 };
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
-    const startDate = req.query.startDate;
+
+    let startDate = req.query.startDate;
     let endDate = req.query.endDate;
+
     if (startDate || endDate) {
-      if (!endDate) {
-        endDate = Date.now();
+      if (startDate && !endDate) {
+        endDate = startDate;
+      } else if (!startDate && endDate) {
+        startDate = endDate;
       }
 
-      new Date(startDate);
-      new Date(endDate);
+      startDate = new Date(startDate);
+      endDate = new Date(endDate);
+      startDate.setHours(0);
+      endDate.setHours(24);
+
+      console.log(
+        startDate.toLocaleString(),
+        "endDate",
+        endDate.toLocaleString()
+      );
+
       const total = await DailyVisit.countDocuments({
         createdAt: { $gte: startDate, $lte: endDate },
         userId: staffID,
       });
+
       const allVisits = await DailyVisit.find({
         createdAt: { $gte: startDate, $lte: endDate },
         userId: staffID,
@@ -216,6 +304,7 @@ router.get("/all/visits/:Id", async (req, res) => {
       });
     }
 
+    const total = await DailyVisit.countDocuments({ userId: staffID });
     const allVisits = await DailyVisit.find({ userId: staffID })
       .populate({
         path: "location",
@@ -227,6 +316,7 @@ router.get("/all/visits/:Id", async (req, res) => {
       .sort(sortBY);
 
     const totalPages = Math.ceil(total / limit);
+
     res.status(200).send({
       success: true,
       data: allVisits,
@@ -254,17 +344,35 @@ router.get("/all/visit/:plantId", async (req, res) => {
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
-    const startDate = req.query.startDate;
+    let startDate = req.query.startDate;
     let endDate = req.query.endDate;
     if (startDate || endDate) {
-      if (!endDate) {
-        endDate = Date.now();
+      if (startDate && !endDate) {
+        endDate = startDate;
+      } else if (!startDate && endDate) {
+        startDate = endDate;
       }
 
-      new Date(startDate);
-      new Date(endDate);
-      const total = await DailyVisit.countDocuments({ location: plantId });
-      const allVisits = await DailyVisit.find({ location: plantId })
+      startDate = new Date(startDate);
+      endDate = new Date(endDate);
+      startDate.setHours(0);
+      endDate.setHours(24);
+
+      console.log(
+        startDate.toLocaleString(),
+        "endDate",
+        endDate.toLocaleString()
+      );
+
+      const total = await DailyVisit.countDocuments({
+        location: plantId,
+        createdAt: { $gte: startDate, $lte: endDate },
+      });
+
+      const allVisits = await DailyVisit.find({
+        location: plantId,
+        createdAt: { $gte: startDate, $lte: endDate },
+      })
         .populate({
           path: "location",
           select: "address plants_id short_id latitude longitude",
@@ -321,18 +429,30 @@ router.get("/all/visits", async (req, res) => {
     if (req.query.sort) {
       sortBY = JSON.parse(req.query.sort);
     }
-    const startDate = req.query.startDate;
+    let startDate = req.query.startDate;
     let endDate = req.query.endDate;
     if (startDate || endDate) {
-      if (!endDate) {
-        endDate = Date.now();
+      if (startDate && !endDate) {
+        endDate = startDate;
+      } else if (!startDate && endDate) {
+        startDate = endDate;
       }
 
-      new Date(startDate);
-      new Date(endDate);
+      startDate = new Date(startDate);
+      endDate = new Date(endDate);
+      startDate.setHours(0);
+      endDate.setHours(24);
+
+      console.log(
+        startDate.toLocaleString(),
+        "endDate",
+        endDate.toLocaleString()
+      );
+
       const total = await DailyVisit.countDocuments({
         createdAt: { $gte: startDate, $lte: endDate },
       });
+
       const allVisits = await DailyVisit.find({
         createdAt: { $gte: startDate, $lte: endDate },
       })
