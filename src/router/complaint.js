@@ -357,27 +357,27 @@ router.post(
         }
       }
       const complaintId = req.params.Id;
-      const { text, recommendation } = req.body;
+      const { text, recommendation, inventoryItem } = req.body;
       const inventoryItems = JSON.parse(req.body.inventoryItem);
       console.log(inventoryItems);
-      let inventoryArray = [];
-      for (let i = 0; i < inventoryItems.length; i++) {
-        const element = inventoryItems[i];
-        console.log(element);
-        const inventery = await Inventory.findById(element);
-        if (inventery.Stock == 0) {
-          return res.status(400).send({
-            success: false,
-            message: `The Item you choose "${inventery.MaterialInventory}" is already 0`,
-          });
-        }
-        inventery.Stock = inventery.Stock - 1;
-        await inventery.save();
-        inventoryArray.push(inventery.MaterialInventory);
-      }
+      // let inventoryArray = [];
+      // for (let i = 0; i < inventoryItems.length; i++) {
+      //   const element = inventoryItems[i];
+      //   console.log(element);
+      //   const inventery = await Inventory.findById(element);
+      //   if (inventery.Stock == 0) {
+      //     return res.status(400).send({
+      //       success: false,
+      //       message: `The Item you choose "${inventery.MaterialInventory}" is already 0`,
+      //     });
+      //   }
+      //   inventery.Stock = inventery.Stock - 1;
+      //   await inventery.save();
+      //   inventoryArray.push(inventery.MaterialInventory);
+      // }
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
-        inventoryItem: inventoryArray,
+        inventoryItem: inventoryItems,
         recommendation,
         text,
         resolved: true,

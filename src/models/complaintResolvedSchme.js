@@ -17,7 +17,8 @@ const ComplaintResolvedSchme = new mongoose.Schema(
     },
     inventoryItem: [
       {
-        type: String,
+        Id: { type: mongoose.Schema.Types.ObjectId, ref: "Inventory" },
+        Stock: { type: Number },
       },
     ],
     pics: {
