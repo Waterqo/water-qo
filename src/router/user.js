@@ -462,6 +462,42 @@ router.delete("/delete/staff/:Id", async (req, res) => {
   }
 });
 
+router.delete("/delete/client/:Id", async (req, res) => {
+  try {
+    const userId = req.params.Id;
+    const user = await Client.findByIdAndDelete(userId);
+    if (!user) {
+      return res
+        .status(400)
+        .send({ seccess: false, message: "No Staff Found" });
+    }
+    res
+      .status(200)
+      .send({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
+router.delete("/delete/Invmanager/:Id", async (req, res) => {
+  try {
+    const userId = req.params.Id;
+    const user = await InvManager.findByIdAndDelete(userId);
+    if (!user) {
+      return res
+        .status(400)
+        .send({ seccess: false, message: "No Staff Found" });
+    }
+    res
+      .status(200)
+      .send({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
 router.put("/update/client", verifyClient, async (req, res) => {
   try {
     const userId = req.user;
