@@ -65,7 +65,7 @@ const ComplaintSchme = new mongoose.Schema(
     },
     staffId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Admin",
+      ref: "Staff",
     },
     resolvedComplaint: {
       type: mongoose.Schema.Types.ObjectId,
@@ -81,7 +81,7 @@ const ComplaintSchme = new mongoose.Schema(
     },
     staff: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Client",
+      ref: "Staff",
     },
     complaintType: {
       type: String,

@@ -1181,4 +1181,34 @@ router.delete("/OneinvDelete/:Id", verifyInvManager, async (req, res) => {
   }
 });
 
+router.get("/invCut");
+
+router.get("/invReport/:complaintId", async (req, res) => {
+  try {
+    const complaintResId = req.params.complaintId;
+    const complaintRes = await ComplaintResolved.findById(complaintResId)
+      .select("complaintId inventoryItem")
+      .populate({
+        path: "complaintId",
+        select: "waterPlant staffId complaintCategory complaint",
+        populate: {
+          path: "waterPlant",
+          select: "short_id plants_id",
+        },
+      })
+      .populate({
+        path: "complaintId",
+        select: "waterPlant staffId complaintCategory complaint",
+        populate: { path: "staffId", select: "name contact_number role" },
+      });
+    res.status(200).send({
+      success: true,
+      data: complaintRes,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server Eroor!");
+  }
+});
+
 module.exports = router;

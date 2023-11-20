@@ -164,4 +164,22 @@ router.get("/staff/:id", async (req, res) => {
   }
 });
 
+router.delete("/delete/Plant/:Id", async (req, res) => {
+  try {
+    const userId = req.params.Id;
+    const user = await Plant.findByIdAndDelete(userId);
+    if (!user) {
+      return res
+        .status(400)
+        .send({ seccess: false, message: "No Plant Found" });
+    }
+    res
+      .status(200)
+      .send({ success: true, message: "Plant deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+});
+
 module.exports = router;
