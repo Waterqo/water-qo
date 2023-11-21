@@ -359,9 +359,12 @@ router.post(
       const complaintId = req.params.Id;
       const { text, recommendation, inventoryItem } = req.body;
       let inventoryArray = [];
-      for (let i = 0; i < inventoryItem.length; i++) {
-        const element = JSON.parse(inventoryItem[i]);
-        inventoryArray.push(element);
+      console.log(inventoryItem);
+      if (inventoryItem.length >= 1) {
+        for (let i = 0; i < inventoryItem.length; i++) {
+          const element = JSON.parse(inventoryItem[i]);
+          inventoryArray.push(element);
+        }
       }
       // console.log(inventoryItems);
       // let inventoryArray = [];
