@@ -354,13 +354,26 @@ router.post("/login", async (req, res) => {
 
 router.get("/find/client", async (req, res) => {
   try {
-    const allUser = await Client.find();
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+    const total = await Client.countDocuments();
+
+    const allUser = await Client.find().skip(skip).limit(limit).sort(sortBY);
     if (!allUser.length > 0) {
       return res
         .status(400)
         .send({ seccess: false, message: "No Client Found" });
     }
-    res.status(200).send({ success: true, data: allUser });
+    const totalPages = Math.ceil(total / limit);
+    res
+      .status(200)
+      .send({ success: true, data: allUser, page, totalPages, limit, total });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
