@@ -1189,7 +1189,6 @@ router.get("/invCut/:complaintId", async (req, res) => {
   try {
     const comaplaintResID = req.params.complaintId;
     const complaintRes = await ComplaintResolved.findById(comaplaintResID);
-    // console.log(complaintRes);
     const inventoryItem = complaintRes.inventoryItem;
     for (let i = 0; i < inventoryItem.length; i++) {
       const element = inventoryItem[i];
@@ -1202,7 +1201,6 @@ router.get("/invCut/:complaintId", async (req, res) => {
         });
       }
       inventory.Stock -= element.Stock;
-      console.log(inventory.Stock);
       await inventory.save();
     }
     res
