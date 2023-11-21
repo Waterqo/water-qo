@@ -1,24 +1,27 @@
 const mongoose = require("mongoose");
 
-const InventorySchema = new mongoose.Schema({
-  Code: {
-    type: String,
-    requier: true,
+const InventorySchema = new mongoose.Schema(
+  {
+    Code: {
+      type: String,
+      requier: true,
+    },
+    MaterialInventory: {
+      type: String,
+      require: true,
+    },
+    Stock: {
+      type: Number,
+      require: true,
+      default: 0,
+    },
+    Items_Quantity_Full: {
+      type: Number,
+      require: true,
+    },
   },
-  MaterialInventory: {
-    type: String,
-    require: true,
-  },
-  Stock: {
-    type: Number,
-    require: true,
-    default: 0,
-  },
-  Items_Quantity_Full: {
-    type: Number,
-    require: true,
-  },
-});
+  { timestamps: true }
+);
 
 const Inventory = mongoose.model("Inventory", InventorySchema);
 
