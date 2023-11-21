@@ -358,8 +358,12 @@ router.post(
       }
       const complaintId = req.params.Id;
       const { text, recommendation, inventoryItem } = req.body;
-      const inventoryItems = JSON.parse(req.body.inventoryItem);
-      console.log(inventoryItems);
+      let inventoryArray = [];
+      for (let i = 0; i < inventoryItem.length; i++) {
+        const element = JSON.parse(inventoryItem[i]);
+        inventoryArray.push(element);
+      }
+      // console.log(inventoryItems);
       // let inventoryArray = [];
       // for (let i = 0; i < inventoryItems.length; i++) {
       //   const element = inventoryItems[i];
@@ -377,7 +381,7 @@ router.post(
       // }
       const complaintReply = new ComplaintResolved({
         complaintId: req.params.Id,
-        inventoryItem: inventoryItems,
+        inventoryItem: inventoryArray,
         recommendation,
         text,
         resolved: true,
@@ -1181,7 +1185,34 @@ router.delete("/OneinvDelete/:Id", verifyInvManager, async (req, res) => {
   }
 });
 
-router.get("/invCut");
+router.get("/invCut/:complaintId", async (req, res) => {
+  try {
+    const comaplaintResID = req.params.complaintId;
+    const complaintRes = await ComplaintResolved.findById(comaplaintResID);
+    // console.log(complaintRes);
+    const inventoryItem = complaintRes.inventoryItem;
+    for (let i = 0; i < inventoryItem.length; i++) {
+      const element = inventoryItem[i];
+      const inventoryID = element.Id.toString();
+      const inventory = await Inventory.findById(inventoryID);
+      if (inventory.Stock < element.Stock) {
+        return res.status(400).send({
+          success: false,
+          message: "Your inventory stock is lower then you used",
+        });
+      }
+      inventory.Stock -= element.Stock;
+      console.log(inventory.Stock);
+      await inventory.save();
+    }
+    res
+      .status(200)
+      .send({ success: true, message: "Stock deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server Eroor!");
+  }
+});
 
 router.get("/invReport/:complaintId", async (req, res) => {
   try {

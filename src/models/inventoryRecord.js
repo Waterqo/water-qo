@@ -5,9 +5,19 @@ const InventoryRecord = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Staff",
   },
-  complaintId: {
+  complaintResolvedId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Staff",
+    ref: "ComplaintResolved",
   },
-  complaintresolved: {},
+  inventoryRecord: [
+    {
+      Id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Inventory",
+      },
+      Stock: {
+        type: Number,
+      },
+    },
+  ],
 });
