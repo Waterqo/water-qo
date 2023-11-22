@@ -363,7 +363,6 @@ router.post(
         inventoryItem.splice(index, 1);
       }
       let inventoryArray = [];
-      console.log(inventoryItem.length);
       if (inventoryItem.length >= 1) {
         for (let i = 0; i < inventoryItem.length; i++) {
           const element = JSON.parse(inventoryItem[i]);
@@ -466,7 +465,12 @@ router.get("/complaint/resolve/one/:id", async (req, res) => {
     const resolvedId = req.params.id;
     const allComplain = await ComplaintResolved.findById(resolvedId)
       .populate({ path: "comment", select: "comment userId" })
-      .populate("complaintId");
+      .populate("complaintId")
+      .populate({
+        path: "inventoryItem",
+        select: "Id",
+        populate: { path: "Id", select: "Code MaterialInventory" },
+      });
 
     if (!allComplain) {
       return res
