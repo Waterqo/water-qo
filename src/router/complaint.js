@@ -358,8 +358,12 @@ router.post(
       }
       const complaintId = req.params.Id;
       const { text, recommendation, inventoryItem } = req.body;
+      let index = inventoryItem.indexOf("");
+      if (index !== -1) {
+        inventoryItem.splice(index, 1);
+      }
       let inventoryArray = [];
-      console.log(inventoryItem);
+      console.log(inventoryItem.length);
       if (inventoryItem.length >= 1) {
         for (let i = 0; i < inventoryItem.length; i++) {
           const element = JSON.parse(inventoryItem[i]);
