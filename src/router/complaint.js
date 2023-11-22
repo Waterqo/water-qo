@@ -1191,6 +1191,7 @@ router.delete("/OneinvDelete/:Id", verifyInvManager, async (req, res) => {
 router.get("/invCut/:complaintId", async (req, res) => {
   try {
     const comaplaintResID = req.params.complaintId;
+
     const complaintRes = await ComplaintResolved.findById(comaplaintResID);
     const inventoryItem = complaintRes.inventoryItem;
     for (let i = 0; i < inventoryItem.length; i++) {
@@ -1206,6 +1207,9 @@ router.get("/invCut/:complaintId", async (req, res) => {
       inventory.Stock -= element.Stock;
       await inventory.save();
     }
+    complaintRes.inventoryManagerApproved = "true";
+    await complaintRes.save();
+    console.log(complaintRes);
     res
       .status(200)
       .send({ success: true, message: "Stock deleted successfully" });
@@ -1232,6 +1236,11 @@ router.get("/invReport/:complaintId", async (req, res) => {
         path: "complaintId",
         select: "waterPlant staffId complaintCategory complaint",
         populate: { path: "staffId", select: "name contact_number role" },
+      })
+      .populate({
+        path: "inventoryItem",
+        select: "Id",
+        populate: { path: "Id", select: "Code MaterialInventory" },
       });
     res.status(200).send({
       success: true,

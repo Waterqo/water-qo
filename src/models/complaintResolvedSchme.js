@@ -31,6 +31,10 @@ const ComplaintResolvedSchme = new mongoose.Schema(
         ref: "Comment",
       },
     ],
+    inventoryManagerApproved: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
