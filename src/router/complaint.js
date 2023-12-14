@@ -18,6 +18,7 @@ const InvManager = require("../models/inventerymanage");
 const { timeStamp } = require("console");
 const { now } = require("mongoose");
 const ComplaintCategory = require("../models/complainCategory");
+const Plant = require("../models/plants");
 var serverKey = process.env.SERVERKEY;
 var fcm = new FCM(serverKey);
 
@@ -47,11 +48,14 @@ router.post(
   upload.array("attachArtwork", 5),
   ComplaintJoiSchema,
   async (req, res) => {
+    const files = req.files;
+    const attachArtwork = [];
     try {
-      const userId = req.params.Id;
-      const files = req.files || [];
-      const attachArtwork = [];
-
+      // if (!files || files?.length < 1)
+      //   return res.status(401).json({
+      //     success: false,
+      //     message: "You have to upload at least one image to the listing",
+      //   });
       for (const file of files) {
         const { path } = file;
         try {
@@ -61,14 +65,14 @@ router.post(
           attachArtwork.push({ url: uploader.secure_url });
           fs.unlinkSync(path);
         } catch (err) {
-          if (attachArtwork.length) {
-            const imgs = attachArtwork.map((obj) => obj.public_id);
+          if (attachArtwork?.length) {
+            const imgs = imgObjs.map((obj) => obj.public_id);
             cloudinary.api.delete_resources(imgs);
           }
           console.log(err);
         }
       }
-
+      const userId = req.params.Id;
       const {
         nameOfComplainter,
         waterPlant,
@@ -84,162 +88,84 @@ router.post(
       ) {
         return res
           .status(400)
-          .send({ success: false, message: "Please provide all the details" });
+          .send({ success: false, message: "kindle provide all the details" });
+      }
+      console.log(waterPlant);
+      const plant = await Plant.findById(waterPlant);
+      console.log(plant);
+      const complaintCode =
+        plant.short_id + " - " + new Date().toLocaleDateString();
+      const user = await Client.findById(userId);
+      let newComplaint;
+      if (user) {
+        newComplaint = new Complaint({
+          complaintCode,
+          nameOfComplainter,
+          waterPlant,
+          complaintCategory,
+          complaint,
+          complaintType,
+          status: "Pending",
+          pics: attachArtwork.map((x) => x.url),
+          clientID: userId,
+          role: "Client",
+        });
+      }
+      const userAdmin = await Admin.findById(userId);
+      if (userAdmin) {
+        newComplaint = new Complaint({
+          complaintCode,
+          nameOfComplainter,
+          waterPlant,
+          complaintCategory,
+          complaint,
+          complaintType: "Normal",
+          status: "Pending",
+          pics: attachArtwork.map((x) => x.url),
+          adminID: userId,
+          role: "Admin",
+        });
+      }
+      const userStaff = await Staff.findById(userId);
+      if (userStaff) {
+        newComplaint = new Complaint({
+          complaintCode,
+          nameOfComplainter,
+          waterPlant,
+          complaintCategory,
+          complaintType: "Normal",
+          complaint,
+          status: "Pending",
+          pics: attachArtwork.map((x) => x.url),
+          staff: userId,
+          role: "Staff",
+        });
       }
 
-      const user =
-        (await Client.findById(userId)) ||
-        (await Admin.findById(userId)) ||
-        (await Staff.findById(userId));
-
-      if (!user) {
-        return res
-          .status(404)
-          .send({ success: false, message: "User not found" });
+      const admin = await Admin.find();
+      let tokendeviceArray = [];
+      for (let index = 0; index < admin.length; index++) {
+        const element = admin[index];
+        element.deviceToken == undefined
+          ? " "
+          : tokendeviceArray.push(element.deviceToken);
       }
-
-      const newComplaint = new Complaint({
-        nameOfComplainter,
-        waterPlant,
-        complaintCategory,
-        complaint,
-        complaintType: user instanceof Admin ? "Normal" : complaintType,
-        status: "Pending",
-        pics: attachArtwork.map((x) => x.url),
-        clientID: user instanceof Client ? userId : undefined,
-        adminID: user instanceof Admin ? userId : undefined,
-        staff: user instanceof Staff ? userId : undefined,
-        role:
-          user instanceof Client
-            ? "Client"
-            : user instanceof Admin
-            ? "Admin"
-            : "Staff",
-      });
-
-      const adminTokens = Array.from(
-        new Set(Admin.find().map((element) => element.deviceToken || " "))
-      );
-      const newdeviceToken = adminTokens.filter(
-        (item, index) => adminTokens.indexOf(item) === index
+      const newdeviceToken = tokendeviceArray.filter(
+        (item, index) => tokendeviceArray.indexOf(item) === index
       );
       const ID = newComplaint._id;
       const title = "A new complaint is added";
-      const body = "Hello Admin, A new Complaint is added!";
+      const body = `Hello Admin, A new Complaint is added !`;
       const deviceToken = newdeviceToken;
 
       deviceToken.length > 0 &&
         deviceToken.forEach((eachToken) => {
           sendNotification(title, body, eachToken, ID);
         });
-
       await newComplaint.save();
       res.status(200).send({
         success: true,
-        message: "Your complaint is sent successfully",
-        data: newComplaint,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal Server Error: " + error.message);
-    }
-  }
-);
-router.post(
-  "/create/complaint/:Id",
-  upload.array("attachArtwork", 5),
-  ComplaintJoiSchema,
-  async (req, res) => {
-    try {
-      const userId = req.params.Id;
-      const files = req.files || [];
-      const attachArtwork = [];
-
-      for (const file of files) {
-        const { path } = file;
-        try {
-          const uploader = await cloudinary.uploader.upload(path, {
-            folder: "24-Karat",
-          });
-          attachArtwork.push({ url: uploader.secure_url });
-          fs.unlinkSync(path);
-        } catch (err) {
-          if (attachArtwork.length) {
-            const imgs = attachArtwork.map((obj) => obj.public_id);
-            cloudinary.api.delete_resources(imgs);
-          }
-          console.log(err);
-        }
-      }
-
-      const {
-        nameOfComplainter,
-        waterPlant,
-        complaintType,
-        complaintCategory,
-        complaint,
-      } = req.body;
-      if (
-        !nameOfComplainter ||
-        !waterPlant ||
-        !complaintCategory ||
-        !complaint
-      ) {
-        return res
-          .status(400)
-          .send({ success: false, message: "Please provide all the details" });
-      }
-
-      const user =
-        (await Client.findById(userId)) ||
-        (await Admin.findById(userId)) ||
-        (await Staff.findById(userId));
-
-      if (!user) {
-        return res
-          .status(404)
-          .send({ success: false, message: "User not found" });
-      }
-
-      const newComplaint = new Complaint({
-        nameOfComplainter,
-        waterPlant,
-        complaintCategory,
-        complaint,
-        complaintType: user instanceof Admin ? "Normal" : complaintType,
-        status: "Pending",
-        pics: attachArtwork.map((x) => x.url),
-        clientID: user instanceof Client ? userId : undefined,
-        adminID: user instanceof Admin ? userId : undefined,
-        staff: user instanceof Staff ? userId : undefined,
-        role:
-          user instanceof Client
-            ? "Client"
-            : user instanceof Admin
-            ? "Admin"
-            : "Staff",
-      });
-
-      const adminTokens = Array.from(
-        new Set(Admin.find().map((element) => element.deviceToken || " "))
-      );
-      const newdeviceToken = adminTokens.filter(
-        (item, index) => adminTokens.indexOf(item) === index
-      );
-      const ID = newComplaint._id;
-      const title = "A new complaint is added";
-      const body = "Hello Admin, A new Complaint is added!";
-      const deviceToken = newdeviceToken;
-
-      deviceToken.length > 0 &&
-        deviceToken.forEach((eachToken) => {
-          sendNotification(title, body, eachToken, ID);
-        });
-
-      await newComplaint.save();
-      res.status(200).send({
-        success: true,
-        message: "Your complaint is sent successfully",
+        message: "your complaint is send successfully",
         data: newComplaint,
       });
     } catch (error) {
@@ -264,6 +190,7 @@ router.get("/complaints", async (req, res) => {
 
       const allComplain = await Complaint.find({ complaintType: "Urgent" })
         .populate("waterPlant")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -414,32 +341,43 @@ router.put("/assignstaff/:Id", async (req, res) => {
 
 router.post(
   "/complaint/resolved/:Id",
-  upload.array("attachArtwork", 5),
+  upload.fields([
+    { name: "attachArtwork", maxCount: 5 },
+    { name: "voice", maxCount: 1 },
+  ]),
   async (req, res) => {
-    const files = req.files;
-    const attachArtwork = [];
     try {
-      // if (!files || files?.length < 1)
-      //   return res.status(401).json({
-      //     success: false,
-      //     message: "You have to upload at least one image to the listing",
-      //   });
-      for (const file of files) {
-        const { path } = file;
-        try {
-          const uploader = await cloudinary.uploader.upload(path, {
-            folder: "24-Karat",
-          });
-          attachArtwork.push({ url: uploader.secure_url });
-          fs.unlinkSync(path);
-        } catch (err) {
-          if (attachArtwork?.length) {
-            const imgs = imgObjs.map((obj) => obj.public_id);
-            cloudinary.api.delete_resources(imgs);
+      const processFiles = async (files, folder) => {
+        const result = [];
+        for (const file of files) {
+          const { path } = file;
+          try {
+            const uploader = await cloudinary.uploader.upload(path, {
+              folder,
+            });
+            result.push({ url: uploader.secure_url });
+            fs.unlinkSync(path);
+          } catch (err) {
+            if (result.length) {
+              const imgs = result.map((obj) => obj.public_id);
+              cloudinary.api.delete_resources(imgs);
+            }
+            console.log(err);
+            throw new Error(`Error uploading ${folder} file`);
           }
-          console.log(err);
         }
-      }
+        return result;
+      };
+
+      const attachArtwork = await processFiles(
+        req.files.attachArtwork || [],
+        "24-Karat"
+      );
+      const voiceUrls = await processFiles(
+        req.files.voice || [],
+        "24-Karat/voice"
+      );
+
       const complaintId = req.params.Id;
       const { text, recommendation, inventoryItem } = req.body;
       let index = inventoryItem.indexOf("");
@@ -474,6 +412,7 @@ router.post(
         inventoryItem: inventoryArray,
         recommendation,
         text,
+        voice: voiceUrls[0].url,
         resolved: true,
         pics: attachArtwork.map((x) => x.url),
       });
@@ -586,6 +525,7 @@ router.get("/complaint/resolve", async (req, res) => {
 
     const allComplain = await ComplaintResolved.find()
       .populate("complaintId")
+      .populate({ path: "complaintCategory", select: "complaintCategory" })
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
@@ -636,6 +576,7 @@ router.get("/complaintStatus/:status/:type", async (req, res) => {
 
     const allComplain = await Complaint.find(filterObj)
       .populate("waterPlant")
+      .populate({ path: "complaintCategory", select: "complaintCategory" })
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
@@ -743,6 +684,7 @@ router.get("/complaintByPlant/:Id", async (req, res) => {
 
     const plantComplaint = await Complaint.find({ waterPlant: plantId })
       .populate("waterPlant")
+      .populate({ path: "complaintCategory", select: "complaintCategory" })
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
@@ -793,7 +735,8 @@ router.get("/complaintclient/:Id/:status", async (req, res) => {
         complaintType: "Urgent",
         clientID: plantId,
       })
-        .populate("waterPlant")
+        .populate("waterPlant ")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -824,6 +767,7 @@ router.get("/complaintclient/:Id/:status", async (req, res) => {
         clientID: plantId,
       })
         .populate("waterPlant")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -855,6 +799,7 @@ router.get("/complaintclient/:Id/:status", async (req, res) => {
         clientID: plantId,
       })
         .populate("waterPlant")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -872,6 +817,7 @@ router.get("/complaintclient/:Id/:status", async (req, res) => {
     } else if (statusFind == "All") {
       const plantComplaint = await Complaint.find({ clientID: plantId })
         .populate("waterPlant")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -924,6 +870,8 @@ router.get("/complaintAdmin/:Id/:status", async (req, res) => {
         adminID: plantId,
       })
         .populate("waterPlant")
+        .populate("waterPlant")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -942,6 +890,7 @@ router.get("/complaintAdmin/:Id/:status", async (req, res) => {
 
     const plantComplaint = await Complaint.find({ adminID: plantId })
       .populate("waterPlant")
+      .populate({ path: "complaintCategory", select: "complaintCategory" })
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
@@ -992,7 +941,8 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
         complaintType: "Urgent",
         staff: plantId,
       })
-        .populate("waterPlant")
+        .populate("waterPlant ")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -1023,6 +973,7 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
         staff: plantId,
       })
         .populate("waterPlant")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -1055,6 +1006,7 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
         staff: plantId,
       })
         .populate("waterPlant")
+        .populate({ path: "complaintCategory", select: "complaintCategory" })
         .skip(skip)
         .limit(limit)
         .sort(sortBY);
@@ -1073,6 +1025,7 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
 
     const plantComplaint = await Complaint.find({ staff: plantId })
       .populate("waterPlant")
+      .populate({ path: "complaintCategory", select: "complaintCategory" })
       .skip(skip)
       .limit(limit)
       .sort(sortBY);
@@ -1097,27 +1050,59 @@ router.get("/complaintStaff/:Id/:status", async (req, res) => {
   }
 });
 
-router.post("/comment/:Id", async (req, res) => {
-  try {
-    const resolvedId = req.params.Id;
-    const comment = req.body.comment;
-    const userId = req.body.userId;
-    const newcomment = new Comment({
-      userId,
-      comment,
-      resolvedId,
-    });
-    await newcomment.save();
-    console.log();
-    const complaint = await ComplaintResolved.findById(resolvedId);
-    complaint.comment.push(newcomment._id);
-    await complaint.save();
-    return res.status(200).send({ success: true, data: complaint });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).send("internal server error");
+router.post(
+  "/comment/:Id",
+  upload.array("attachArtwork", 1),
+  async (req, res) => {
+    const files = req.files;
+    try {
+      // if (!files || files?.length < 1)
+      //   return res.status(401).json({
+      //     success: false,
+      //     message: "You have to upload at least one image to the listing",
+      //   });
+      const attachArtwork = [];
+      for (const file of files) {
+        const { path } = file;
+        try {
+          const uploader = await cloudinary.uploader.upload(path, {
+            folder: "24-Karat",
+          });
+          attachArtwork.push({ url: uploader.secure_url });
+          fs.unlinkSync(path);
+        } catch (err) {
+          if (attachArtwork?.length) {
+            const imgs = imgObjs.map((obj) => obj.public_id);
+            cloudinary.api.delete_resources(imgs);
+          }
+          console.log(err);
+        }
+      }
+      const resolvedId = req.params.Id;
+      const comment = req.body.comment;
+      +console.log(comment);
+      console.log(comment);
+      const userId = req.body.userId;
+
+      const newcomment = new Comment({
+        userId,
+        comment,
+        resolvedId,
+        file: attachArtwork[0].url,
+      });
+      await newcomment.save();
+      console.log(newcomment);
+      const complaint = await ComplaintResolved.findById(resolvedId);
+      complaint.comment.push(newcomment._id);
+      await complaint.save();
+      console.log(complaint);
+      return res.status(200).send({ success: true, data: complaint });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send("internal server error");
+    }
   }
-});
+);
 
 router.get("/assignStaff/:Id", async (req, res) => {
   try {
@@ -1132,6 +1117,7 @@ router.get("/assignStaff/:Id", async (req, res) => {
     const total = await Complaint.countDocuments({ staffId: staffId });
     const finding = await Complaint.find({ staffId: staffId })
       .populate("waterPlant")
+      .populate({ path: "complaintCategory", select: "complaintCategory" })
       .skip(skip)
       .limit(limit)
       .sort(sortBY);

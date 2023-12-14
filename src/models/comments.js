@@ -4,7 +4,6 @@ const CommentSchema = new mongoose.Schema(
   {
     comment: {
       type: String,
-      require: true,
     },
     userId: {
       type: String,
@@ -15,6 +14,9 @@ const CommentSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       require: true,
       ref: "ComplaintResolved",
+    },
+    file: {
+      type: String,
     },
   },
   { timestamps: true }

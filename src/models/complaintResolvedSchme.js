@@ -15,6 +15,9 @@ const ComplaintResolvedSchme = new mongoose.Schema(
     text: {
       type: String,
     },
+    voice: {
+      type: String,
+    },
     inventoryItem: [
       {
         Id: { type: mongoose.Schema.Types.ObjectId, ref: "Inventory" },
