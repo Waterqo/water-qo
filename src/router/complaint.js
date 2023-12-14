@@ -17,6 +17,7 @@ const { filter } = require("compression");
 const InvManager = require("../models/inventerymanage");
 const { timeStamp } = require("console");
 const { now } = require("mongoose");
+const ComplaintCategory = require("../models/complainCategory");
 var serverKey = process.env.SERVERKEY;
 var fcm = new FCM(serverKey);
 
@@ -46,14 +47,11 @@ router.post(
   upload.array("attachArtwork", 5),
   ComplaintJoiSchema,
   async (req, res) => {
-    const files = req.files;
-    const attachArtwork = [];
     try {
-      // if (!files || files?.length < 1)
-      //   return res.status(401).json({
-      //     success: false,
-      //     message: "You have to upload at least one image to the listing",
-      //   });
+      const userId = req.params.Id;
+      const files = req.files || [];
+      const attachArtwork = [];
+
       for (const file of files) {
         const { path } = file;
         try {
@@ -63,14 +61,14 @@ router.post(
           attachArtwork.push({ url: uploader.secure_url });
           fs.unlinkSync(path);
         } catch (err) {
-          if (attachArtwork?.length) {
-            const imgs = imgObjs.map((obj) => obj.public_id);
+          if (attachArtwork.length) {
+            const imgs = attachArtwork.map((obj) => obj.public_id);
             cloudinary.api.delete_resources(imgs);
           }
           console.log(err);
         }
       }
-      const userId = req.params.Id;
+
       const {
         nameOfComplainter,
         waterPlant,
@@ -86,76 +84,162 @@ router.post(
       ) {
         return res
           .status(400)
-          .send({ success: false, message: "kindle provide all the details" });
-      }
-      const user = await Client.findById(userId);
-      let newComplaint;
-      if (user) {
-        newComplaint = new Complaint({
-          nameOfComplainter,
-          waterPlant,
-          complaintCategory,
-          complaint,
-          complaintType,
-          status: "Pending",
-          pics: attachArtwork.map((x) => x.url),
-          clientID: userId,
-          role: "Client",
-        });
-      }
-      const userAdmin = await Admin.findById(userId);
-      if (userAdmin) {
-        newComplaint = new Complaint({
-          nameOfComplainter,
-          waterPlant,
-          complaintCategory,
-          complaint,
-          complaintType: "Normal",
-          status: "Pending",
-          pics: attachArtwork.map((x) => x.url),
-          adminID: userId,
-          role: "Admin",
-        });
-      }
-      const userStaff = await Staff.findById(userId);
-      if (userStaff) {
-        newComplaint = new Complaint({
-          nameOfComplainter,
-          waterPlant,
-          complaintCategory,
-          complaintType: "Normal",
-          complaint,
-          status: "Pending",
-          pics: attachArtwork.map((x) => x.url),
-          staff: userId,
-          role: "Staff",
-        });
+          .send({ success: false, message: "Please provide all the details" });
       }
 
-      const admin = await Admin.find();
-      let tokendeviceArray = [];
-      for (let index = 0; index < admin.length; index++) {
-        const element = admin[index];
-        element.deviceToken == undefined
-          ? " "
-          : tokendeviceArray.push(element.deviceToken);
+      const user =
+        (await Client.findById(userId)) ||
+        (await Admin.findById(userId)) ||
+        (await Staff.findById(userId));
+
+      if (!user) {
+        return res
+          .status(404)
+          .send({ success: false, message: "User not found" });
       }
-      const newdeviceToken = tokendeviceArray.filter(
-        (item, index) => tokendeviceArray.indexOf(item) === index
+
+      const newComplaint = new Complaint({
+        nameOfComplainter,
+        waterPlant,
+        complaintCategory,
+        complaint,
+        complaintType: user instanceof Admin ? "Normal" : complaintType,
+        status: "Pending",
+        pics: attachArtwork.map((x) => x.url),
+        clientID: user instanceof Client ? userId : undefined,
+        adminID: user instanceof Admin ? userId : undefined,
+        staff: user instanceof Staff ? userId : undefined,
+        role:
+          user instanceof Client
+            ? "Client"
+            : user instanceof Admin
+            ? "Admin"
+            : "Staff",
+      });
+
+      const adminTokens = Array.from(
+        new Set(Admin.find().map((element) => element.deviceToken || " "))
+      );
+      const newdeviceToken = adminTokens.filter(
+        (item, index) => adminTokens.indexOf(item) === index
       );
       const ID = newComplaint._id;
       const title = "A new complaint is added";
-      const body = `Hello Admin, A new Complaint is added !`;
+      const body = "Hello Admin, A new Complaint is added!";
       const deviceToken = newdeviceToken;
 
       deviceToken.length > 0 &&
         deviceToken.forEach((eachToken) => {
           sendNotification(title, body, eachToken, ID);
         });
+
       await newComplaint.save();
       res.status(200).send({
         success: true,
-        message: "your complaint is send successfully",
+        message: "Your complaint is sent successfully",
+        data: newComplaint,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal Server Error: " + error.message);
+    }
+  }
+);
+router.post(
+  "/create/complaint/:Id",
+  upload.array("attachArtwork", 5),
+  ComplaintJoiSchema,
+  async (req, res) => {
+    try {
+      const userId = req.params.Id;
+      const files = req.files || [];
+      const attachArtwork = [];
+
+      for (const file of files) {
+        const { path } = file;
+        try {
+          const uploader = await cloudinary.uploader.upload(path, {
+            folder: "24-Karat",
+          });
+          attachArtwork.push({ url: uploader.secure_url });
+          fs.unlinkSync(path);
+        } catch (err) {
+          if (attachArtwork.length) {
+            const imgs = attachArtwork.map((obj) => obj.public_id);
+            cloudinary.api.delete_resources(imgs);
+          }
+          console.log(err);
+        }
+      }
+
+      const {
+        nameOfComplainter,
+        waterPlant,
+        complaintType,
+        complaintCategory,
+        complaint,
+      } = req.body;
+      if (
+        !nameOfComplainter ||
+        !waterPlant ||
+        !complaintCategory ||
+        !complaint
+      ) {
+        return res
+          .status(400)
+          .send({ success: false, message: "Please provide all the details" });
+      }
+
+      const user =
+        (await Client.findById(userId)) ||
+        (await Admin.findById(userId)) ||
+        (await Staff.findById(userId));
+
+      if (!user) {
+        return res
+          .status(404)
+          .send({ success: false, message: "User not found" });
+      }
+
+      const newComplaint = new Complaint({
+        nameOfComplainter,
+        waterPlant,
+        complaintCategory,
+        complaint,
+        complaintType: user instanceof Admin ? "Normal" : complaintType,
+        status: "Pending",
+        pics: attachArtwork.map((x) => x.url),
+        clientID: user instanceof Client ? userId : undefined,
+        adminID: user instanceof Admin ? userId : undefined,
+        staff: user instanceof Staff ? userId : undefined,
+        role:
+          user instanceof Client
+            ? "Client"
+            : user instanceof Admin
+            ? "Admin"
+            : "Staff",
+      });
+
+      const adminTokens = Array.from(
+        new Set(Admin.find().map((element) => element.deviceToken || " "))
+      );
+      const newdeviceToken = adminTokens.filter(
+        (item, index) => adminTokens.indexOf(item) === index
+      );
+      const ID = newComplaint._id;
+      const title = "A new complaint is added";
+      const body = "Hello Admin, A new Complaint is added!";
+      const deviceToken = newdeviceToken;
+
+      deviceToken.length > 0 &&
+        deviceToken.forEach((eachToken) => {
+          sendNotification(title, body, eachToken, ID);
+        });
+
+      await newComplaint.save();
+      res.status(200).send({
+        success: true,
+        message: "Your complaint is sent successfully",
         data: newComplaint,
       });
     } catch (error) {
@@ -1176,7 +1260,7 @@ router.get("/Oneinv/:Id", async (req, res) => {
     return res.status(200).send({ success: true, data: inv });
   } catch (error) {
     console.error(error);
-    return res.status(500).send("Internal server Eroor!");
+    return res.status(500).send("Internal server error!");
   }
 });
 
@@ -1192,7 +1276,7 @@ router.delete("/OneinvDelete/:Id", verifyInvManager, async (req, res) => {
       .send({ success: true, message: "product deleted successfully" });
   } catch (error) {
     console.error(error);
-    return res.status(500).send("Internal server Eroor!");
+    return res.status(500).send("Internal server error!");
   }
 });
 
@@ -1223,7 +1307,7 @@ router.get("/invCut/:complaintId", async (req, res) => {
       .send({ success: true, message: "Stock deleted successfully" });
   } catch (error) {
     console.error(error);
-    return res.status(500).send("Internal server Eroor!");
+    return res.status(500).send("Internal server error!");
   }
 });
 
@@ -1256,7 +1340,87 @@ router.get("/invReport/:complaintId", async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    return res.status(500).send("Internal server Eroor!");
+    return res.status(500).send("Internal server error!");
+  }
+});
+
+router.post("/category", async (req, res) => {
+  try {
+    const complaintCategory = req.body.complaintCategory;
+    const category = new ComplaintCategory({
+      complaintCategory,
+    });
+    await category.save();
+    return res.status(200).send({ success: true, data: category });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server error!");
+  }
+});
+
+router.get("/categoryAll", async (req, res) => {
+  try {
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+
+    let sortBY = { createdAt: -1 };
+    if (req.query.sort) {
+      sortBY = JSON.parse(req.query.sort);
+    }
+    const total = await ComplaintCategory.countDocuments();
+    const all = await ComplaintCategory.find()
+      .skip(skip)
+      .limit(limit)
+      .sort(sortBY);
+    const totalPages = Math.ceil(total / limit);
+
+    res
+      .status(200)
+      .send({ success: true, data: all, page, totalPages, limit, total });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server error");
+  }
+});
+
+router.get("/categoryOne/:Id", async (req, res) => {
+  try {
+    const id = req.params.Id;
+    const all = await ComplaintCategory.findById(id);
+    res.status(200).send({ success: true, data: all });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server error");
+  }
+});
+
+router.put("/category/:Id", async (req, res) => {
+  try {
+    const id = req.params.Id;
+    const complaintCategory = req.body.complaintCategory;
+    const category = await ComplaintCategory.findById(id);
+    category.complaintCategory =
+      complaintCategory || category.complaintCategory;
+
+    await category.save();
+    res.status(200).send({ success: true, data: category });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server error");
+  }
+});
+
+router.delete("/categoryDelete/:Id", async (req, res) => {
+  try {
+    const id = req.params.Id;
+    const all = await ComplaintCategory.findByIdAndDelete(id);
+    res
+      .status(200)
+      .send({ success: true, message: "Category deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal server error");
   }
 });
 
