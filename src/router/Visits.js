@@ -6,48 +6,29 @@ const Plant = require("../models/plants");
 const fs = require("fs");
 const upload = require("../helper/multer");
 
-// router.post("/visits", upload.array("attachArtwork", 10), async (req, res) => {
-//   const files = req.files;
-//   const attachArtwork = [];
-//   try {
-//     if (!files || files?.length < 1)
-//       return res.status(401).json({
-//         success: false,
-//         message: "You have to upload at least one image to the listing",
-//       });
-//     for (const file of files) {
-//       const { path } = file;
-//       try {
-//         const uploader = await cloudinary.uploader.upload(path, {
-//           folder: "24-Karat",
-//         });
-//         attachArtwork.push({ url: uploader.secure_url });
-//         fs.unlinkSync(path);
-//       } catch (err) {
-//         if (attachArtwork?.length) {
-//           const imgs = imgObjs.map((obj) => obj.public_id);
-//           cloudinary.api.delete_resources(imgs);
-//         }
-//         console.log(err);
-//       }
-//     }
-//     const { userId, location } = req.body;
+var FCM = require("fcm-node");
+const Staff = require("../models/staff");
 
-//     const visitDaily = new DailyVisit({
-//       userId: req.body.userId,
-//       location: req.body.location,
-//       pics: attachArtwork.map((x) => x.url),
-//     });
-//     await visitDaily.save();
-//     res.status(200).send({
-//       message: "complaint is successsfully resolved",
-//       visitDaily,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send("Internal Server Error: " + error.message);
-//   }
-// });
+var serverKey = process.env.SERVERKEY;
+var fcm = new FCM(serverKey);
+
+const sendNotification = async (title, body, deviceToken) => {
+  const message = {
+    notification: {
+      title: title,
+      body: body,
+    },
+    to: deviceToken,
+  };
+
+  fcm.send(message, function (err, response) {
+    if (err) {
+      console.log("Something has gone wrong!");
+    } else {
+      console.log("Successfully sent with response: ", response);
+    }
+  });
+};
 
 router.post(
   "/visits",
@@ -63,6 +44,15 @@ router.post(
   async (req, res) => {
     try {
       const files = req.files;
+
+      if (files) {
+        res.status(200).send({
+          success: true,
+          message:
+            "You visit request is in process. You have been notified later !",
+        });
+      }
+
       // console.log(files);
       const attachArtwork = {
         Complain_Cell_Sticker: [],
@@ -73,11 +63,20 @@ router.post(
         Internal_Plant_Cleaning: [],
         Log_Book: [],
       };
-      if (!files || files?.length < 1)
-        return res.status(401).json({
-          success: false,
-          message: "You have to upload at least one image to the listing",
-        });
+      if (!files || files?.length < 1) {
+        const title = "Visit request faild";
+        const body = "You have to upload at least one image to the listing";
+        const userId = req.body.userId;
+        device = await Staff.findById(userId).select("deviceToken");
+        deviceToken = device.deviceToken;
+        console.log(deviceToken);
+        sendNotification(title, body, deviceToken);
+      }
+
+      // return res.status(401).json({
+      //   success: false,
+      //   message: "You have to upload at least one image to the listing",
+      // });
       for (const fileArray in files) {
         for (const file in files[fileArray]) {
           try {
@@ -102,11 +101,9 @@ router.post(
         }
       }
       const meter = req.body.meterReading;
-      console.log(meter);
       const plant = await Plant.findById(req.body.location);
-      console.log(plant);
       const meterReading = meter - plant.meterCount;
-      console.log();
+
       const visitDaily = new DailyVisit({
         userId: req.body.userId,
         location: req.body.location,
@@ -152,103 +149,45 @@ router.post(
       const distance = calculateDistance(plantLat, plantLon, userLat, userLon);
 
       if (distance > 5) {
-        return res.status(400).send({
-          success: false,
-          message: "You are not in a 5-KM radius form the Plant location",
-        });
+        const title = "Visit request faild";
+        const body = "You are not in a 5-KM radius form the Plant location";
+        const userId = req.body.userId;
+        device = await Staff.findById(userId).select("deviceToken");
+        deviceToken = device.deviceToken;
+        console.log(deviceToken);
+        sendNotification(title, body, deviceToken);
+        // return res.status(400).send({
+        //   success: false,
+        //   message: "You are not in a 5-KM radius form the Plant location",
+        // });
       }
       console.log(plant.meterCount);
       console.log(meter);
       plant.meterCount = meter;
       await plant.save();
       await visitDaily.save();
-      res.status(200).send({
-        message: "complaint is successsfully resolved",
-        visitDaily,
-        latitude: pumb.latitude,
-        longitude: pumb.longitude,
-      });
+
+      const title = "Visit request has been added";
+      const body =
+        "Your visit request has been added to the server  ThankYou! ";
+      const userId = req.body.userId;
+      device = await Staff.findById(userId).select("deviceToken");
+      deviceToken = device.deviceToken;
+      console.log(deviceToken);
+      sendNotification(title, body, deviceToken);
     } catch (error) {
       console.error(error);
-      res.status(500).send("Internal Server Error: " + error.message);
+      const title = "Visit request faild";
+      const body = "SomeThing Went Wrong, Try again later, Maybe server Error";
+      const userId = req.body.userId;
+      device = await Staff.findById(userId).select("deviceToken");
+      deviceToken = device.deviceToken;
+      console.log(deviceToken);
+      sendNotification(title, body, deviceToken);
+      // res.status(500).send("Internal Server Error: " + error.message);
     }
   }
 );
-
-// router.get("/all/visits/:Id", async (req, res) => {
-//   try {
-//     const staffID = req.params.Id;
-//     const page = parseInt(req.query.page, 10) || 1;
-//     const limit = parseInt(req.query.limit, 10) || 10;
-//     const skip = (page - 1) * limit;
-//     const total = await DailyVisit.countDocuments({ userId: staffID });
-
-//     let sortBY = { createdAt: -1 };
-//     if (req.query.sort) {
-//       sortBY = JSON.parse(req.query.sort);
-//     }
-//     const startDate = req.query.startDate;
-//     let endDate = req.query.endDate;
-//     if (startDate || endDate) {
-//       if (!endDate) {
-//         endDate = Date.now();
-//       }
-
-//       new Date(startDate);
-//       new Date(endDate);
-//       const total = await DailyVisit.countDocuments({
-//         createdAt: { $gte: startDate, $eq: endDate },
-//         userId: staffID,
-//       });
-//       const allVisits = await DailyVisit.find({
-//         createdAt: { $gte: startDate, $eq: endDate },
-//         userId: staffID,
-//       })
-//         .populate({
-//           path: "location",
-//           select: "address plants_id short_id latitude longitude",
-//         })
-//         .populate({ path: "userId", select: "name contact_number" })
-//         .skip(skip)
-//         .limit(limit)
-//         .sort(sortBY);
-
-//       const totalPages = Math.ceil(total / limit);
-
-//       return res.status(200).send({
-//         success: true,
-//         data: allVisits,
-//         page,
-//         totalPages,
-//         limit,
-//         total,
-//       });
-//     }
-
-//     const allVisits = await DailyVisit.find({ userId: staffID })
-//       .populate({
-//         path: "location",
-//         select: "address plants_id short_id latitude longitude",
-//       })
-//       .populate({ path: "userId", select: "name contact_number" })
-//       .skip(skip)
-//       .limit(limit)
-//       .sort(sortBY);
-
-//     const totalPages = Math.ceil(total / limit);
-//     res.status(200).send({
-//       success: true,
-//       data: allVisits,
-//       page,
-//       totalPages,
-//       limit,
-//       total,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send("Internal Server Error: " + error.message);
-//   }
-// });
 
 router.get("/all/visits/:Id", async (req, res) => {
   try {
