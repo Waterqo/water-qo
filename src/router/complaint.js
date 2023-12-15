@@ -45,41 +45,47 @@ const sendNotification = async (title, body, deviceToken, ID) => {
 
 router.post(
   "/create/complaint/:Id",
-  upload.array("attachArtwork", 5),
-  ComplaintJoiSchema,
+  upload.fields([
+    { name: "attachArtwork", maxCount: 5 },
+    { name: "voice", maxCount: 1 },
+  ]),
   async (req, res) => {
-    const files = req.files;
-    const attachArtwork = [];
     try {
-      // if (!files || files?.length < 1)
-      //   return res.status(401).json({
-      //     success: false,
-      //     message: "You have to upload at least one image to the listing",
-      //   });
-      for (const file of files) {
-        const { path } = file;
-        try {
-          const uploader = await cloudinary.uploader.upload(path, {
-            folder: "24-Karat",
-          });
-          attachArtwork.push({ url: uploader.secure_url });
-          fs.unlinkSync(path);
-        } catch (err) {
-          if (attachArtwork?.length) {
-            const imgs = imgObjs.map((obj) => obj.public_id);
-            cloudinary.api.delete_resources(imgs);
+      const processFiles = async (files, folder) => {
+        const result = [];
+        for (const file of files) {
+          const { path } = file;
+          try {
+            const uploader = await cloudinary.uploader.upload(path, {
+              folder,
+            });
+            result.push({ url: uploader.secure_url });
+            fs.unlinkSync(path);
+          } catch (err) {
+            if (result.length) {
+              const imgs = result.map((obj) => obj.public_id);
+              cloudinary.api.delete_resources(imgs);
+            }
+            console.log(err);
+            throw new Error(`Error uploading ${folder} file`);
           }
-          console.log(err);
         }
-      }
+        return result;
+      };
+
+      const attachArtwork = await processFiles(
+        req.files.attachArtwork || [],
+        "24-Karat"
+      );
+      const voiceUrls = await processFiles(
+        req.files.voice || [],
+        "24-Karat/voice"
+      );
+
       const userId = req.params.Id;
-      const {
-        nameOfComplainter,
-        waterPlant,
-        complaintType,
-        complaintCategory,
-        complaint,
-      } = req.body;
+      const { nameOfComplainter, waterPlant, complaintCategory, complaint } =
+        req.body;
+
       if (
         !nameOfComplainter ||
         !waterPlant ||
@@ -88,84 +94,53 @@ router.post(
       ) {
         return res
           .status(400)
-          .send({ success: false, message: "kindle provide all the details" });
-      }
-      console.log(waterPlant);
-      const plant = await Plant.findById(waterPlant);
-      console.log(plant);
-      const complaintCode =
-        plant.short_id + " - " + new Date().toLocaleDateString();
-      const user = await Client.findById(userId);
-      let newComplaint;
-      if (user) {
-        newComplaint = new Complaint({
-          complaintCode,
-          nameOfComplainter,
-          waterPlant,
-          complaintCategory,
-          complaint,
-          complaintType,
-          status: "Pending",
-          pics: attachArtwork.map((x) => x.url),
-          clientID: userId,
-          role: "Client",
-        });
-      }
-      const userAdmin = await Admin.findById(userId);
-      if (userAdmin) {
-        newComplaint = new Complaint({
-          complaintCode,
-          nameOfComplainter,
-          waterPlant,
-          complaintCategory,
-          complaint,
-          complaintType: "Normal",
-          status: "Pending",
-          pics: attachArtwork.map((x) => x.url),
-          adminID: userId,
-          role: "Admin",
-        });
-      }
-      const userStaff = await Staff.findById(userId);
-      if (userStaff) {
-        newComplaint = new Complaint({
-          complaintCode,
-          nameOfComplainter,
-          waterPlant,
-          complaintCategory,
-          complaintType: "Normal",
-          complaint,
-          status: "Pending",
-          pics: attachArtwork.map((x) => x.url),
-          staff: userId,
-          role: "Staff",
-        });
+          .send({ success: false, message: "Please provide all the details" });
       }
 
+      const plant = await Plant.findById(waterPlant);
+      const complaintCode = plant
+        ? `${plant.short_id} - ${new Date().toLocaleDateString()}`
+        : "Unknown";
+
+      const user = (await Client.findById(userId)) || {};
+      const userAdmin = (await Admin.findById(userId)) || {};
+      const userStaff = (await Staff.findById(userId)) || {};
+
+      console.log(req.files.voice[0].url);
+      const newComplaint = new Complaint({
+        complaintCode,
+        nameOfComplainter,
+        waterPlant,
+        complaintCategory,
+        voice: voiceUrls[0].url,
+        complaint,
+        complaintType: userAdmin ? "Normal" : userStaff ? "Normal" : undefined,
+        status: "Pending",
+        pics: attachArtwork[0].url,
+        clientID: user._id,
+        adminID: userAdmin._id,
+        staff: userStaff._id,
+        role: userAdmin ? "Admin" : userStaff ? "Staff" : "Client",
+      });
+
       const admin = await Admin.find();
-      let tokendeviceArray = [];
-      for (let index = 0; index < admin.length; index++) {
-        const element = admin[index];
-        element.deviceToken == undefined
-          ? " "
-          : tokendeviceArray.push(element.deviceToken);
-      }
-      const newdeviceToken = tokendeviceArray.filter(
-        (item, index) => tokendeviceArray.indexOf(item) === index
-      );
+      const deviceToken = [
+        ...new Set(admin.map((element) => element.deviceToken || "")),
+      ].filter(Boolean);
+
       const ID = newComplaint._id;
       const title = "A new complaint is added";
       const body = `Hello Admin, A new Complaint is added !`;
-      const deviceToken = newdeviceToken;
 
-      deviceToken.length > 0 &&
-        deviceToken.forEach((eachToken) => {
-          sendNotification(title, body, eachToken, ID);
-        });
+      deviceToken.forEach((eachToken) =>
+        sendNotification(title, body, eachToken, ID)
+      );
+
       await newComplaint.save();
+
       res.status(200).send({
         success: true,
-        message: "your complaint is send successfully",
+        message: "Your complaint has been submitted successfully",
         data: newComplaint,
       });
     } catch (error) {

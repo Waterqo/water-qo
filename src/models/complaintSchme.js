@@ -21,7 +21,9 @@ const ComplaintSchme = new mongoose.Schema(
     },
     complaint: {
       type: String,
-      required: true,
+    },
+    voice: {
+      type: String,
     },
     pics: {
       type: Array,
