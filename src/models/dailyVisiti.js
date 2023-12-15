@@ -36,6 +36,10 @@ const DailyVisitSchema = new mongoose.Schema(
       type: Array,
       require: true,
     },
+    meterReading: {
+      type: Number,
+      default: 0,
+    },
     Log_Book: {
       type: Array,
       require: true,

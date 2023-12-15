@@ -23,6 +23,10 @@ const PlantsSchema = new mongoose.Schema(
     project: {
       type: String,
     },
+    meterCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

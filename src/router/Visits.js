@@ -101,10 +101,16 @@ router.post(
           }
         }
       }
-
+      const meter = req.body.meterReading;
+      console.log(meter);
+      const plant = await Plant.findById(req.body.location);
+      console.log(plant);
+      const meterReading = meter - plant.meterCount;
+      console.log();
       const visitDaily = new DailyVisit({
         userId: req.body.userId,
         location: req.body.location,
+        meterReading,
         Complain_Cell_Sticker: attachArtwork.Complain_Cell_Sticker.map(
           (x) => x.url
         ),
@@ -151,7 +157,10 @@ router.post(
           message: "You are not in a 5-KM radius form the Plant location",
         });
       }
-
+      console.log(plant.meterCount);
+      console.log(meter);
+      plant.meterCount = meter;
+      await plant.save();
       await visitDaily.save();
       res.status(200).send({
         message: "complaint is successsfully resolved",
