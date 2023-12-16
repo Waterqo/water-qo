@@ -46,10 +46,12 @@ router.post(
       const files = req.files;
       console.log(files);
       if (files) {
+        const visitDaily = new DailyVisit({});
+        await visitDaily.save();
         res.status(200).send({
           success: true,
           message:
-            "You visit request is in process. You have been notified later !",
+            "You visit request is in process. You will be notified later !",
         });
       }
 
@@ -104,7 +106,7 @@ router.post(
       const plant = await Plant.findById(req.body.location);
       const meterReading = meter - plant.meterCount;
 
-      const visitDaily = new DailyVisit({
+      const visitDaily = {
         userId: req.body.userId,
         location: req.body.location,
         meterReading,
@@ -121,7 +123,8 @@ router.post(
           (x) => x.url
         ),
         Log_Book: attachArtwork.Log_Book.map((x) => x.url),
-      });
+        uploaded: true,
+      };
       const pumb = await Plant.findById(req.body.location);
 
       function calculateDistance(lat, lon, latitude, longitude) {
