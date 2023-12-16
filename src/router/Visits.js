@@ -44,7 +44,7 @@ router.post(
   async (req, res) => {
     try {
       const files = req.files;
-
+      console.log(files);
       if (files) {
         res.status(200).send({
           success: true,

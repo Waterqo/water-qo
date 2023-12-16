@@ -511,9 +511,9 @@ router.delete("/delete/Invmanager/:Id", async (req, res) => {
   }
 });
 
-router.put("/update/client", verifyClient, async (req, res) => {
+router.put("/update/client/:clientId", async (req, res) => {
   try {
-    const userId = req.user;
+    const userId = req.params.clientId;
     const { name, contact_number, email, waterPlant, deviceToken } = req.body;
     const user = await Client.findById(userId);
 
@@ -541,9 +541,9 @@ router.put("/update/client", verifyClient, async (req, res) => {
   }
 });
 
-router.put("/update/admin", verifyAdmin, async (req, res) => {
+router.put("/update/admin/:adminId", async (req, res) => {
   try {
-    const userId = req.user;
+    const userId = req.params.adminId;
     const { name, contact_number, email, password, deviceToken } = req.body;
     const user = await Admin.findById(userId);
 
