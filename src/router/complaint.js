@@ -106,17 +106,16 @@ router.post(
       const userAdmin = (await Admin.findById(userId)) || {};
       const userStaff = (await Staff.findById(userId)) || {};
 
-      console.log(req.files.voice[0].url);
       const newComplaint = new Complaint({
         complaintCode,
         nameOfComplainter,
         waterPlant,
         complaintCategory,
-        voice: voiceUrls[0].url,
+        voice: voiceUrls.length > 0 ? voiceUrls[0].url : null,
         complaint,
         complaintType: userAdmin ? "Normal" : userStaff ? "Normal" : undefined,
         status: "Pending",
-        pics: attachArtwork[0].url,
+        pics: attachArtwork.length > 0 ? attachArtwork[0].url : null,
         clientID: user._id,
         adminID: userAdmin._id,
         staff: userStaff._id,
