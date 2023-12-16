@@ -514,7 +514,8 @@ router.delete("/delete/Invmanager/:Id", async (req, res) => {
 router.put("/update/client/:clientId", async (req, res) => {
   try {
     const userId = req.params.clientId;
-    const { name, contact_number, email, waterPlant, deviceToken } = req.body;
+    const { name, contact_number, email, waterPlant, password, deviceToken } =
+      req.body;
     const user = await Client.findById(userId);
 
     user.name = name || user.name;
