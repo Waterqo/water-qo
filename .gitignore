@@ -1,2 +1,5 @@
 node_modules
 .env
+src/helper/uploads/*.jpg
+src/helper/uploads/*.webp
+src/helper/uploads/*.png

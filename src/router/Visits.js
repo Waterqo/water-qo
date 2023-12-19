@@ -13,17 +13,17 @@ var serverKey = process.env.SERVERKEY;
 var fcm = new FCM(serverKey);
 
 const sendNotification = async (title, body, deviceToken) => {
+  console.log(title, body, deviceToken);
   const message = {
     notification: {
-      title: title,
       body: body,
     },
     to: deviceToken,
   };
-
+  console.log(message);
   fcm.send(message, function (err, response) {
     if (err) {
-      console.log("Something has gone wrong!");
+      console.log("Something has gone wrong!", err);
     } else {
       console.log("Successfully sent with response: ", response);
     }
@@ -45,11 +45,15 @@ router.post(
     try {
       const files = req.files;
       console.log(files);
+      let visitDaily = new DailyVisit({
+        userId: req.body.userId,
+      });
+
       if (files) {
-        const visitDaily = new DailyVisit({});
         await visitDaily.save();
         res.status(200).send({
           success: true,
+          visitDaily,
           message:
             "You visit request is in process. You will be notified later !",
         });
@@ -106,25 +110,21 @@ router.post(
       const plant = await Plant.findById(req.body.location);
       const meterReading = meter - plant.meterCount;
 
-      const visitDaily = {
-        userId: req.body.userId,
-        location: req.body.location,
-        meterReading,
-        Complain_Cell_Sticker: attachArtwork.Complain_Cell_Sticker.map(
-          (x) => x.url
-        ),
-        Internal_Panel: attachArtwork.Internal_Panel.map((x) => x.url),
-        MPVs_Meters: attachArtwork.MPVs_Meters.map((x) => x.url),
-        Water_Meter: attachArtwork.Water_Meter.map((x) => x.url),
-        Dispensing_Area_Cleaning: attachArtwork.Dispensing_Area_Cleaning.map(
-          (x) => x.url
-        ),
-        Internal_Plant_Cleaning: attachArtwork.Internal_Plant_Cleaning.map(
-          (x) => x.url
-        ),
-        Log_Book: attachArtwork.Log_Book.map((x) => x.url),
-        uploaded: true,
-      };
+      visitDaily.location = req.body.location;
+      visitDaily.meterReading = meterReading;
+      visitDaily.Complain_Cell_Sticker =
+        attachArtwork.Complain_Cell_Sticker.map((x) => x.url);
+      visitDaily.Internal_Panel = attachArtwork.Internal_Panel.map(
+        (x) => x.url
+      );
+      visitDaily.MPVs_Meters = attachArtwork.MPVs_Meters.map((x) => x.url);
+      visitDaily.Water_Meter = attachArtwork.Water_Meter.map((x) => x.url);
+      visitDaily.Dispensing_Area_Cleaning =
+        attachArtwork.Dispensing_Area_Cleaning.map((x) => x.url);
+      visitDaily.Internal_Plant_Cleaning =
+        attachArtwork.Internal_Plant_Cleaning.map((x) => x.url);
+      visitDaily.Log_Book = attachArtwork.Log_Book.map((x) => x.url);
+      visitDaily.uploaded = true;
       const pumb = await Plant.findById(req.body.location);
 
       function calculateDistance(lat, lon, latitude, longitude) {
@@ -169,7 +169,7 @@ router.post(
       plant.meterCount = meter;
       await plant.save();
       await visitDaily.save();
-
+      console.log(visitDaily);
       const title = "Visit request has been added";
       const body =
         "Your visit request has been added to the server  ThankYou! ";

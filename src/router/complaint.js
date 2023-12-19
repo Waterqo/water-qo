@@ -1062,7 +1062,7 @@ router.post(
         userId,
         comment,
         resolvedId,
-        file: attachArtwork[0].url,
+        file: attachArtwork.length > 0 ? attachArtwork[0].url : null,
       });
       await newcomment.save();
       console.log(newcomment);
