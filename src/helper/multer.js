@@ -18,11 +18,14 @@ const imageFilter = (req, file, cb) => {
     file.mimetype === "image/jpeg" ||
     file.mimetype === "image/avif" ||
     file.mimetype === "image/jfif" ||
-    file.mimetype === "image/webp"
+    file.mimetype === "image/webp" ||
+    file.mimetype === "video/mp4" ||
+    file.mimetype === "audio/mpeg3" ||
+    file.mimetype === "audio/mpeg"
   ) {
     cb(null, true);
   } else {
-    cb(new Error("Only png, jpg, jpeg, avif, jfif, webp are allowed"));
+    cb(new Error("Only mp4, png, jpg, jpeg, avif, jfif, webp are allowed"));
   }
 };
 
@@ -33,5 +36,4 @@ const upload = multer({
     fileSize: MAX_FILE_SIZE,
   },
 });
-
 module.exports = upload;

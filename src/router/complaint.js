@@ -461,7 +461,7 @@ router.get("/complaint/resolve/one/:id", async (req, res) => {
   try {
     const resolvedId = req.params.id;
     const allComplain = await ComplaintResolved.findById(resolvedId)
-      .populate({ path: "comment", select: "comment userId" })
+      .populate({ path: "comment", select: "comment file userId" })
       .populate("complaintId")
       .populate({
         path: "inventoryItem",
@@ -1029,6 +1029,7 @@ router.post(
   upload.array("attachArtwork", 1),
   async (req, res) => {
     const files = req.files;
+    console.log(files);
     try {
       // if (!files || files?.length < 1)
       //   return res.status(401).json({
@@ -1040,8 +1041,26 @@ router.post(
         const { path } = file;
         try {
           const uploader = await cloudinary.uploader.upload(path, {
-            folder: "24-Karat",
+            resource_type: "video",
+            public_id: `VideoUploads/${path.originalname}`,
+            chunk_size: 6000000,
+            eager: [
+              {
+                width: 300,
+                height: 300,
+                crop: "pad",
+                audio_codec: "none",
+              },
+              {
+                width: 160,
+                height: 100,
+                crop: "crop",
+                gravity: "south",
+                audio_codec: "none",
+              },
+            ],
           });
+          console.log(uploader);
           attachArtwork.push({ url: uploader.secure_url });
           fs.unlinkSync(path);
         } catch (err) {
@@ -1052,12 +1071,11 @@ router.post(
           console.log(err);
         }
       }
+      console.log(attachArtwork);
       const resolvedId = req.params.Id;
       const comment = req.body.comment;
-      +console.log(comment);
-      console.log(comment);
-      const userId = req.body.userId;
 
+      const userId = req.body.userId;
       const newcomment = new Comment({
         userId,
         comment,
@@ -1069,7 +1087,6 @@ router.post(
       const complaint = await ComplaintResolved.findById(resolvedId);
       complaint.comment.push(newcomment._id);
       await complaint.save();
-      console.log(complaint);
       return res.status(200).send({ success: true, data: complaint });
     } catch (error) {
       console.error(error);
@@ -1077,6 +1094,70 @@ router.post(
     }
   }
 );
+
+// router.post(
+//   "/comment/:Id",
+//   upload.array("attachArtwork", 1),
+//   async (req, res) => {
+//     const files = req.files;
+//     console.log(files);
+//     try {
+//       const attachArtwork = [];
+//       for (const file of files) {
+//         const { path } = file;
+//         try {
+//           const uploader = await cloudinary.uploader.upload(path, {
+//             resource_type: "video",
+//             public_id: `VideoUploads/${file.originalname}`,
+//             chunk_size: 6000000,
+//             eager: [
+//               {
+//                 width: 300,
+//                 height: 300,
+//                 crop: "pad",
+//                 audio_codec: "none",
+//               },
+//               {
+//                 width: 160,
+//                 height: 100,
+//                 crop: "crop",
+//                 gravity: "south",
+//                 audio_codec: "none",
+//               },
+//             ],
+//           });
+//           console.log(uploader);
+//           attachArtwork.push({ url: uploader.secure_url });
+//           fs.unlinkSync(path);
+//         } catch (err) {
+//           console.error(err);
+//           return res
+//             .status(400)
+//             .send({ success: false, message: "Invalid video format or file" });
+//         }
+//       }
+//       console.log(attachArtwork);
+//       const resolvedId = req.params.Id;
+//       const comment = req.body.comment;
+//       const userId = req.body.userId;
+
+//       const newcomment = new Comment({
+//         userId,
+//         comment,
+//         resolvedId,
+//         file: attachArtwork.length > 0 ? attachArtwork[0].url : null,
+//       });
+//       await newcomment.save();
+//       const complaint = await ComplaintResolved.findById(resolvedId);
+//       complaint.comment.push(newcomment._id);
+//       await complaint.save();
+//       return res.status(200).send({ success: true, data: complaint });
+//     } catch (error) {
+//       console.error(error);
+//       return res.status(500).send("Internal server error");
+//     }
+//   }
+// );
 
 router.get("/assignStaff/:Id", async (req, res) => {
   try {
