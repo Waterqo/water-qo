@@ -1042,7 +1042,9 @@ router.post(
         try {
           const uploader = await cloudinary.uploader.upload(path, {
             resource_type: "video",
-            public_id: `VideoUploads/${path.originalname}`,
+            public_id: `VideoUploads/${
+              file.originalname + new Date().toString()
+            }`,
             chunk_size: 6000000,
             eager: [
               {
