@@ -57,7 +57,26 @@ router.post(
           const { path } = file;
           try {
             const uploader = await cloudinary.uploader.upload(path, {
-              folder,
+              resource_type: "video",
+              public_id: `VideoUploads/${
+                file.originalname + new Date().toString()
+              }`,
+              chunk_size: 6000000,
+              eager: [
+                {
+                  width: 300,
+                  height: 300,
+                  crop: "pad",
+                  audio_codec: "none",
+                },
+                {
+                  width: 160,
+                  height: 100,
+                  crop: "crop",
+                  gravity: "south",
+                  audio_codec: "none",
+                },
+              ],
             });
             result.push({ url: uploader.secure_url });
             fs.unlinkSync(path);
@@ -86,12 +105,7 @@ router.post(
       const { nameOfComplainter, waterPlant, complaintCategory, complaint } =
         req.body;
 
-      if (
-        !nameOfComplainter ||
-        !waterPlant ||
-        !complaintCategory ||
-        !complaint
-      ) {
+      if (!nameOfComplainter || !waterPlant || !complaintCategory) {
         return res
           .status(400)
           .send({ success: false, message: "Please provide all the details" });
