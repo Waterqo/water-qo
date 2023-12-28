@@ -573,7 +573,8 @@ router.put("/update/admin/:adminId", async (req, res) => {
 
 router.put("/update/manager/:userId", async (req, res) => {
   try {
-    const { name, contact_number, email, password, deviceToken } = req.body;
+    const { name, contact_number, email, password, deviceToken, lat, long } =
+      req.body;
     const userId = req.params.userId;
     const user = await InvManager.findById(userId);
 
@@ -581,6 +582,8 @@ router.put("/update/manager/:userId", async (req, res) => {
     user.contact_number = contact_number || user.contact_number;
     user.email = email || user.email;
     user.deviceToken = deviceToken || user.deviceToken;
+    user.lat = lat || user.lat;
+    user.long = long || user.long;
 
     if (password) {
       const salt = await bcrypt.genSalt(10);

@@ -34,6 +34,8 @@ const StaffSchema = new mongoose.Schema(
     ],
     role: String,
     deviceToken: String,
+    lat: Number,
+    long: Number,
   },
   { timestamps: true }
 );
