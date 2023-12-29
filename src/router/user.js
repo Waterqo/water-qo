@@ -613,6 +613,7 @@ router.put("/update/staff/:id", async (req, res) => {
       lat,
       long,
     } = req.body;
+    console.log(req.body);
     const user = await Staff.findById(userId);
 
     user.plant = plant || user.plant;
